@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique @db.VarChar(255)
+  name      String   @db.VarChar(255)
+  role      String   @default("VISITOR") @db.VarChar(50)
+  password  String?  @db.VarChar(255)
+  avatar    String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Project {
+  id               String   @id @default(uuid())
+  title            String   @db.VarChar(255)
+  description      String   @db.Text
+  shortDescription String?  @map("short_description") @db.VarChar(500)
+  imageUrl         String?  @map("image_url") @db.Text
+  images           String[] @default([])
+  projectUrl       String?  @map("project_url") @db.Text
+  githubUrl        String?  @map("github_url") @db.Text
+  technologies     String[]
+  categoryId       String?  @map("category_id")
+  featured         Boolean  @default(false)
+  status           String   @default("published") @db.VarChar(50)
+  viewCount        Int      @default(0) @map("view_count")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  @@map("projects")
+}
+
+model Skill {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(100)
+  category    String?  @db.VarChar(100)
+  proficiency Int
+  icon        String?  @db.Text
+  orderIndex  Int      @default(0) @map("order_index")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("skills")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  color       String?  @db.VarChar(7)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  projects Project[]
+
+  @@map("categories")
+}
+
+model Contact {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(255)
+  email     String    @db.VarChar(255)
+  subject   String?   @db.VarChar(255)
+  message   String    @db.Text
+  status    String    @default("pending") @db.VarChar(50)
+  ipAddress String?   @map("ip_address")
+  userAgent String?   @map("user_agent") @db.Text
+  createdAt DateTime  @default(now()) @map("created_at")
+  repliedAt DateTime? @map("replied_at")
+
+  @@map("contacts")
+}
+
+model Analytics {
+  id        String   @id @default(uuid())
+  pagePath  String   @map("page_path") @db.VarChar(255)
+  pageTitle String?  @map("page_title") @db.VarChar(255)
+  referrer  String?  @db.Text
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  sessionId String?  @map("session_id") @db.VarChar(255)
+  duration  Int?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("analytics")
+}
+
+model SiteSettings {
+  id              String   @id @default("default")
+  siteName        String   @default("PORTX") @map("site_name") @db.VarChar(100)
+  siteDescription String   @default("Personal portfolio website") @map("site_description") @db.VarChar(500)
+  name            String   @default("Your Name") @db.VarChar(255)
+  title           String   @default("Full Stack Developer") @db.VarChar(255)
+  bio             String?  @db.Text
+  avatar          String?  @db.Text
+  email           String?  @db.VarChar(255)
+  location        String?  @db.VarChar(255)
+  resumeUrl       String?  @map("resume_url") @db.Text
+  githubUrl       String?  @map("github_url") @db.Text
+  linkedinUrl     String?  @map("linkedin_url") @db.Text
+  twitterUrl      String?  @map("twitter_url") @db.Text
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  excerpt     String?  @db.VarChar(500)
+  content     String   @db.Text
+  coverImage  String?  @map("cover_image") @db.Text
+  tags        String[] @default([])
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  viewCount   Int      @default(0) @map("view_count")
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("blog_posts")
+}
+
