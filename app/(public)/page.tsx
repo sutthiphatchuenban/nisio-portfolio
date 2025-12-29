@@ -6,6 +6,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 
+// Disable caching - always fetch fresh data from database
+export const revalidate = 0
+
 async function getFeaturedProjects() {
     const projects = await prisma.project.findMany({
         where: { featured: true },

@@ -7,6 +7,9 @@ import { ArrowLeft, Github, Globe } from "lucide-react"
 import { ImageCarousel } from "@/components/shared/ImageCarousel"
 import type { Project } from "@/types"
 
+// Disable caching - always fetch fresh data from database
+export const revalidate = 0
+
 async function getProject(id: string) {
     const project = await prisma.project.findUnique({
         where: { id },

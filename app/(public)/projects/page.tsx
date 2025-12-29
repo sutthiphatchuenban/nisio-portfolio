@@ -2,6 +2,9 @@ import { ProjectCard } from "@/components/projects/ProjectCard"
 import prisma from "@/lib/prisma"
 import type { Project, Category } from "@/types"
 
+// Disable caching - always fetch fresh data from database
+export const revalidate = 0
+
 async function getProjects() {
     const projects = await prisma.project.findMany({
         orderBy: { createdAt: 'desc' },
