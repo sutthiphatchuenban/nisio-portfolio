@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, CalendarDays, Clock, Eye, Share2 } from "lucide-react"
 import type { BlogPost } from "@/types"
 
+// Revalidate every 60 seconds for ISR (Incremental Static Regeneration)
+export const revalidate = 0
+
 async function getBlogPost(slug: string) {
-    // URL-encoded Thai characters might come in as %E0... 
+    // URL-encoded Thai characters might come in as %E0...
     // We should decode it to get the actual Thai characters for database matching
     const decodedSlug = decodeURIComponent(slug)
 

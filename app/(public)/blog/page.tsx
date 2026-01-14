@@ -6,6 +6,9 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { CalendarDays, Clock, Eye, ArrowRight } from "lucide-react"
 import type { BlogPost } from "@/types"
 
+// Revalidate every 60 seconds for ISR (Incremental Static Regeneration)
+export const revalidate = 0
+
 async function getBlogPosts() {
     const posts = await prisma.blogPost.findMany({
         where: { published: true },

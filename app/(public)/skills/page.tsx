@@ -2,6 +2,9 @@ import Prisma from "@/lib/prisma"
 import { SkillCard } from "@/components/skills/SkillCard"
 import type { Skill } from "@/types"
 
+// Revalidate every 60 seconds for ISR (Incremental Static Regeneration)
+export const revalidate = 0
+
 async function getSkills() {
     const skills = await Prisma.skill.findMany({
         orderBy: { orderIndex: 'asc' }

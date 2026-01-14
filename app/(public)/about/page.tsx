@@ -7,6 +7,9 @@ import { Github, Linkedin, Twitter, Mail, MapPin, FileText, ExternalLink } from 
 import Link from "next/link"
 import type { Skill } from "@/types"
 
+// Revalidate every 60 seconds for ISR (Incremental Static Regeneration)
+export const revalidate = 0
+
 async function getSettings() {
     let settings = await prisma.siteSettings.findUnique({
         where: { id: 'default' }
