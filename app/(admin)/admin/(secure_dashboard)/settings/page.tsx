@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import axios from "axios"
 import { toast } from "sonner"
 import { Loader2, Save } from "lucide-react"
+import { useSiteSettings } from "@/components/providers/site-settings-provider"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,6 +29,7 @@ interface SettingsFormValues {
     title: string
     bio: string
     avatar: string
+    heroImage: string
     email: string
     location: string
     resumeUrl: string
@@ -39,6 +41,7 @@ interface SettingsFormValues {
 export default function AdminSettingsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
+    const { refetch } = useSiteSettings()
 
     const form = useForm<SettingsFormValues>({
         defaultValues: {
@@ -48,6 +51,7 @@ export default function AdminSettingsPage() {
             title: "",
             bio: "",
             avatar: "",
+            heroImage: "",
             email: "",
             location: "",
             resumeUrl: "",
@@ -71,6 +75,7 @@ export default function AdminSettingsPage() {
                 title: res.data.title || "",
                 bio: res.data.bio || "",
                 avatar: res.data.avatar || "",
+                heroImage: res.data.heroImage || "",
                 email: res.data.email || "",
                 location: res.data.location || "",
                 resumeUrl: res.data.resumeUrl || "",
@@ -89,6 +94,7 @@ export default function AdminSettingsPage() {
         setIsSaving(true)
         try {
             await axios.put("/api/settings", values)
+            await refetch()
             toast.success("Settings saved successfully")
         } catch (error) {
             toast.error("Failed to save settings")
@@ -150,6 +156,20 @@ export default function AdminSettingsPage() {
                                     )}
                                 />
                             </div>
+                            <FormField
+                                control={form.control}
+                                name="heroImage"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Hero Background Image</FormLabel>
+                                        <FormControl>
+                                            <ImageUpload value={field.value} onChange={field.onChange} />
+                                        </FormControl>
+                                        <FormDescription>Background image for the hero section on homepage</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </CardContent>
                     </Card>
 

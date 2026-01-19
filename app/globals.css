@@ -326,7 +326,7 @@
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-image: linear-gradient(to right, #3f3f46, #71717a);
+  background-image: linear-gradient(to right, #e4e4e7, #71717a);
 }
 
 .dark .hero-gradient {

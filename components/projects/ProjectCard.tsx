@@ -27,6 +27,7 @@ export function ProjectCard({ project, priority = false }: ProjectCardProps) {
                         alt={project.title}
                         fill
                         priority={priority}
+                        unoptimized={true}
                         className="object-cover transition-transform duration-300 hover:scale-105"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />

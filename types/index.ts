@@ -50,6 +50,7 @@ export interface BlogPost {
     excerpt?: string | null
     content: string
     coverImage?: string | null
+    images: string[]
     tags: string[]
     published: boolean
     featured: boolean
@@ -57,4 +58,22 @@ export interface BlogPost {
     publishedAt?: string | null
     createdAt: string
     updatedAt: string
+}
+
+export interface SiteSettings {
+  id: string
+  siteName: string
+  siteDescription: string
+  name: string
+  title: string
+  bio?: string | null
+  avatar?: string | null
+  heroImage?: string | null
+  email?: string | null
+  location?: string | null
+  resumeUrl?: string | null
+  githubUrl?: string | null
+  linkedinUrl?: string | null
+  twitterUrl?: string | null
+  updatedAt: string
 }

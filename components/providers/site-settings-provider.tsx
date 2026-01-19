@@ -9,6 +9,7 @@ interface SiteSettings {
     title: string
     bio: string
     avatar: string
+    heroImage: string
     email: string
     location: string
     resumeUrl: string
@@ -30,6 +31,7 @@ const defaultSettings: SiteSettings = {
     title: "",
     bio: "",
     avatar: "",
+    heroImage: "",
     email: "",
     location: "",
     resumeUrl: "",

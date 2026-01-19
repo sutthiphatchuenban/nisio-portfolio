@@ -27,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import { ThemeEffects } from "@/components/shared/ThemeEffects";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 export default function RootLayout({
   children,
@@ -40,6 +41,7 @@ export default function RootLayout({
       >
         <Providers>
           <ThemeEffects />
+          <AnalyticsTracker />
           {children}
         </Providers>
         <Toaster />

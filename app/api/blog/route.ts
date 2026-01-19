@@ -94,6 +94,7 @@ export async function POST(request: Request) {
                 excerpt: body.excerpt,
                 content: body.content,
                 coverImage: body.coverImage,
+                images: body.images || [],
                 tags: body.tags || [],
                 published: body.published || false,
                 featured: body.featured || false,

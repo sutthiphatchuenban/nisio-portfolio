@@ -51,14 +51,15 @@ export default async function BlogPage() {
                                 {featuredPosts.map((post) => (
                                     <Link key={post.id} href={`/blog/${post.slug}`}>
                                         <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow group theme-card hextech-border">
-                                            {post.coverImage && (
+                                            {(post.images && post.images.length > 0 ? post.images[0] : post.coverImage) && (
                                                 <div className="relative aspect-video overflow-hidden">
                                                     <Image
-                                                        src={post.coverImage}
+                                                        src={post.images && post.images.length > 0 ? post.images[0] : post.coverImage!}
                                                         alt={post.title}
                                                         fill
                                                         sizes="(max-width: 768px) 100vw, 50vw"
                                                         className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        unoptimized={true}
                                                     />
                                                     <div className="absolute top-2 left-2">
                                                         <Badge className="bg-yellow-500 text-black">Featured</Badge>
@@ -110,14 +111,15 @@ export default async function BlogPage() {
                             {regularPosts.map((post) => (
                                 <Link key={post.id} href={`/blog/${post.slug}`}>
                                     <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow group theme-card hextech-border">
-                                        {post.coverImage && (
+                                        {(post.images && post.images.length > 0 ? post.images[0] : post.coverImage) && (
                                             <div className="relative aspect-video overflow-hidden">
                                                 <Image
-                                                    src={post.coverImage}
+                                                    src={post.images && post.images.length > 0 ? post.images[0] : post.coverImage!}
                                                     alt={post.title}
                                                     fill
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                     className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    unoptimized={true}
                                                 />
                                             </div>
                                         )}

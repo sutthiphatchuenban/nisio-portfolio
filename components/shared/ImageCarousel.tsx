@@ -45,6 +45,7 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 896px"
                     className="object-cover transition-all duration-300"
                     priority={currentIndex === 0}
+                    unoptimized={true}
                 />
 
                 {/* Navigation Arrows - แสดงเมื่อมีมากกว่า 1 รูป */}
@@ -97,6 +98,7 @@ export function ImageCarousel({ images, title }: ImageCarouselProps) {
                                 fill
                                 sizes="80px"
                                 className="object-cover"
+                                unoptimized={true}
                             />
                         </button>
                     ))}

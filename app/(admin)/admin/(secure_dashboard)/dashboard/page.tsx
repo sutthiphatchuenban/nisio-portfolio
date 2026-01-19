@@ -75,16 +75,16 @@ export default function AdminDashboard() {
             value: data.stats.totalVisits.toLocaleString(),
             icon: Eye,
             desc: "All time page views",
-            trend: "+12%", // Mock trend
-            trendUp: true
+            trend: data.stats.totalVisits > 0 ? "Tracked" : "No data",
+            trendUp: data.stats.totalVisits > 0
         },
         {
             title: "Unique Visitors",
             value: data.stats.uniqueVisitors.toLocaleString(),
             icon: Users,
             desc: "Distinct users",
-            trend: "+5%",
-            trendUp: true
+            trend: data.stats.uniqueVisitors > 0 ? "Active" : "No data",
+            trendUp: data.stats.uniqueVisitors > 0
         },
         {
             title: "New Messages",

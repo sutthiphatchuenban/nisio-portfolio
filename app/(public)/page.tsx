@@ -10,21 +10,31 @@ import { ArrowRight } from "lucide-react"
 export const revalidate = 0
 
 async function getFeaturedProjects() {
-    const projects = await prisma.project.findMany({
-        where: { featured: true },
-        orderBy: { createdAt: 'desc' },
-        take: 3,
-        include: { category: true }
-    })
-    return projects as unknown as Project[]
+    try {
+        const projects = await prisma.project.findMany({
+            where: { featured: true },
+            orderBy: { createdAt: 'desc' },
+            take: 3,
+            include: { category: true }
+        })
+        return projects as unknown as Project[]
+    } catch (error) {
+        console.error('Failed to fetch featured projects:', error)
+        return []
+    }
 }
 
 async function getSkills() {
-    const skills = await prisma.skill.findMany({
-        orderBy: { orderIndex: 'asc' },
-        take: 8
-    })
-    return skills as unknown as Skill[]
+    try {
+        const skills = await prisma.skill.findMany({
+            orderBy: { orderIndex: 'asc' },
+            take: 8
+        })
+        return skills as unknown as Skill[]
+    } catch (error) {
+        console.error('Failed to fetch skills:', error)
+        return []
+    }
 }
 
 export default async function HomePage() {

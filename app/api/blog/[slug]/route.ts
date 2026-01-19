@@ -73,6 +73,7 @@ export async function PUT(request: Request, props: { params: Promise<{ slug: str
                 excerpt: body.excerpt,
                 content: body.content,
                 coverImage: body.coverImage,
+                images: body.images || [],
                 tags: body.tags || [],
                 published: body.published,
                 featured: body.featured,

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CalendarDays, Clock, Eye, Share2 } from "lucide-react"
+import { ImageCarousel } from "@/components/shared/ImageCarousel"
 import type { BlogPost } from "@/types"
 
 // Revalidate every 60 seconds for ISR (Incremental Static Regeneration)
@@ -105,19 +106,11 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     </div>
                 </header>
 
-                {/* Cover Image */}
-                {post.coverImage && (
-                    <div className="relative aspect-video w-full overflow-hidden rounded-xl border">
-                        <Image
-                            src={post.coverImage}
-                            alt={post.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 896px"
-                            className="object-cover"
-                            priority
-                        />
-                    </div>
-                )}
+                {/* Image Carousel - Support multiple images like projects */}
+                <ImageCarousel
+                    images={post.images && post.images.length > 0 ? post.images : (post.coverImage ? [post.coverImage] : [])}
+                    title={post.title}
+                />
 
                 {/* Content */}
                 <div className="prose dark:prose-invert max-w-none">
@@ -163,14 +156,15 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                         {relatedPosts.map((relatedPost) => (
                             <Link key={relatedPost.id} href={`/blog/${relatedPost.slug}`}>
                                 <div className="group rounded-lg border bg-card overflow-hidden hover:shadow-lg transition-shadow">
-                                    {relatedPost.coverImage && (
+                                    {(relatedPost.images && relatedPost.images.length > 0 ? relatedPost.images[0] : relatedPost.coverImage) && (
                                         <div className="relative aspect-video overflow-hidden">
                                             <Image
-                                                src={relatedPost.coverImage}
+                                                src={relatedPost.images && relatedPost.images.length > 0 ? relatedPost.images[0] : relatedPost.coverImage!}
                                                 alt={relatedPost.title}
                                                 fill
                                                 sizes="33vw"
                                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                unoptimized={true}
                                             />
                                         </div>
                                     )}

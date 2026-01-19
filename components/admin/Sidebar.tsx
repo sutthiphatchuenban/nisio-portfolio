@@ -9,6 +9,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { LayoutDashboard, FolderKanban, Wrench, Mail, LogOut, Settings, Menu, FileText } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useSiteSettings } from "@/components/providers/site-settings-provider"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const sidebarItems = [
     {

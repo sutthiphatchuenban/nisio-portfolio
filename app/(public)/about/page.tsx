@@ -59,6 +59,7 @@ export default async function AboutPage() {
                                             sizes="128px"
                                             className="object-cover"
                                             priority
+                                            unoptimized={true}
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground">

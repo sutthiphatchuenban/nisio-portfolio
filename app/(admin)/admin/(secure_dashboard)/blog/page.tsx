@@ -11,6 +11,7 @@ import { Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ImageUpload } from "@/components/ui/image-upload"
+import { MultiImageUpload } from "@/components/ui/multi-image-upload"
 import {
     Table,
     TableBody,
@@ -46,6 +47,7 @@ const blogSchema = z.object({
     excerpt: z.string().optional(),
     content: z.string().min(10, "Content is required"),
     coverImage: z.string().optional(),
+    images: z.array(z.string()).optional(),
     tags: z.string().optional(),
     published: z.boolean(),
     featured: z.boolean(),
@@ -67,6 +69,7 @@ export default function AdminBlogPage() {
             excerpt: "",
             content: "",
             coverImage: "",
+            images: [],
             tags: "",
             published: false,
             featured: false,
@@ -120,6 +123,7 @@ export default function AdminBlogPage() {
             excerpt: post.excerpt || "",
             content: post.content,
             coverImage: post.coverImage || "",
+            images: post.images || [],
             tags: post.tags.join(", "),
             published: post.published,
             featured: post.featured,
@@ -228,11 +232,28 @@ export default function AdminBlogPage() {
                                 name="coverImage"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Cover Image</FormLabel>
+                                        <FormLabel>Cover Image (Optional - will use first image from gallery if not set)</FormLabel>
                                         <FormControl>
                                             <ImageUpload
                                                 value={field.value}
                                                 onChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="images"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Image Gallery</FormLabel>
+                                        <FormControl>
+                                            <MultiImageUpload
+                                                value={field.value || []}
+                                                onChange={field.onChange}
+                                                maxImages={10}
                                             />
                                         </FormControl>
                                         <FormMessage />

@@ -105,6 +105,7 @@ model SiteSettings {
   title           String   @default("Full Stack Developer") @db.VarChar(255)
   bio             String?  @db.Text
   avatar          String?  @db.Text
+  heroImage       String?  @map("hero_image") @db.Text
   email           String?  @db.VarChar(255)
   location        String?  @db.VarChar(255)
   resumeUrl       String?  @map("resume_url") @db.Text
@@ -123,6 +124,7 @@ model BlogPost {
   excerpt     String?  @db.VarChar(500)
   content     String   @db.Text
   coverImage  String?  @map("cover_image") @db.Text
+  images      String[] @default([])
   tags        String[] @default([])
   published   Boolean  @default(false)
   featured    Boolean  @default(false)
