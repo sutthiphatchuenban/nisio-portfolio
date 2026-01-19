@@ -35,44 +35,45 @@ export function MultiImageUpload({
         }
 
         setIsUploading(true)
-        const newUrls: string[] = []
 
-        try {
-            for (const file of Array.from(files)) {
-                // Validate file type
-                if (!file.type.startsWith("image/")) {
-                    toast.error(`${file.name} is not an image file`)
-                    continue
-                }
-
-                // Validate file size (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    toast.error(`${file.name} must be less than 5MB`)
-                    continue
-                }
-
-                const formData = new FormData()
-                formData.append("file", file)
-
-                const res = await axios.post("/api/upload", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                })
-
-                newUrls.push(res.data.url)
+        const uploadPromises = Array.from(files).map(async (file) => {
+            if (!file.type.startsWith("image/")) {
+                throw new Error(`${file.name} is not an image file`)
             }
 
-            if (newUrls.length > 0) {
-                onChange([...value, ...newUrls])
-                toast.success(`${newUrls.length} image(s) uploaded successfully`)
+            if (file.size > 5 * 1024 * 1024) {
+                throw new Error(`${file.name} must be less than 5MB`)
             }
-        } catch (error) {
-            console.error(error)
-            toast.error("Failed to upload images")
-        } finally {
-            setIsUploading(false)
-            if (inputRef.current) {
-                inputRef.current.value = ""
+
+            const formData = new FormData()
+            formData.append("file", file)
+
+            const res = await axios.post("/api/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+
+            return res.data.url
+        })
+
+        const results = await Promise.allSettled(uploadPromises)
+        const successfulUploads: string[] = []
+
+        results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                successfulUploads.push(result.value)
+            } else {
+                toast.error(`Failed to upload ${files[index].name}: ${result.reason.message || 'Unknown error'}`)
             }
+        })
+
+        if (successfulUploads.length > 0) {
+            onChange([...value, ...successfulUploads])
+            toast.success(`${successfulUploads.length} image(s) uploaded successfully`)
+        }
+
+        setIsUploading(false)
+        if (inputRef.current) {
+            inputRef.current.value = ""
         }
     }
 

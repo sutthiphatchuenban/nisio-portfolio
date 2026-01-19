@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Github, Linkedin, Twitter, Mail, MapPin, FileText, ExternalLink } from "lucide-react"
 import Link from "next/link"
+import ReactMarkdown from "react-markdown"
 import type { Skill } from "@/types"
 
 // Revalidate every 60 seconds for ISR (Incremental Static Regeneration)
@@ -131,9 +132,11 @@ export default async function AboutPage() {
                         <h2 className="text-3xl font-bold mb-4">About Me</h2>
                         <div className="prose dark:prose-invert max-w-none">
                             {settings.bio ? (
-                                <p className="text-lg text-muted-foreground whitespace-pre-wrap">
-                                    {settings.bio}
-                                </p>
+                                <div className="text-lg text-muted-foreground">
+                                    <ReactMarkdown>
+                                        {settings.bio}
+                                    </ReactMarkdown>
+                                </div>
                             ) : (
                                 <p className="text-muted-foreground">No bio yet.</p>
                             )}

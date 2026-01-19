@@ -17,6 +17,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'No file uploaded' }, { status: 400 })
         }
 
+        if (!file.type.startsWith('image/')) {
+            return NextResponse.json({ message: 'Only image files are allowed' }, { status: 400 })
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            return NextResponse.json({ message: 'Image must be less than 5MB' }, { status: 400 })
+        }
+
         const arrayBuffer = await file.arrayBuffer()
         const buffer = Buffer.from(arrayBuffer)
 

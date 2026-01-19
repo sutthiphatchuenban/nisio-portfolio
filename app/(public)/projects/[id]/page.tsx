@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft, Github, Globe } from "lucide-react"
 import { ImageCarousel } from "@/components/shared/ImageCarousel"
+import ReactMarkdown from "react-markdown"
 import type { Project } from "@/types"
 
 // Disable caching - always fetch fresh data from database
@@ -64,9 +65,11 @@ export default async function ProjectDetailPage(props: { params: Promise<{ id: s
                     <div className="space-y-6">
                         <div className="prose dark:prose-invert max-w-none">
                             <h3 className="text-xl font-semibold mb-2">About the Project</h3>
-                            <p className="whitespace-pre-wrap leading-relaxed border-l-2 pl-4 border-muted">
-                                {project.description}
-                            </p>
+                            <div className="border-l-2 pl-4 border-muted leading-relaxed">
+                                <ReactMarkdown>
+                                    {project.description}
+                                </ReactMarkdown>
+                            </div>
                         </div>
 
                         <div className="space-y-2">
