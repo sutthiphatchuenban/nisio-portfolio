@@ -18,12 +18,35 @@ export interface SiteSettings {
 
 const DEFAULT_SETTINGS_ID = 'default'
 
+// Helper function to add timeout to promises
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            reject(new Error('Database connection timeout'))
+        }, timeoutMs)
+
+        promise.then(
+            (result) => {
+                clearTimeout(timer)
+                resolve(result)
+            },
+            (error) => {
+                clearTimeout(timer)
+                reject(error)
+            }
+        )
+    })
+}
+
 // Server-side function to get site settings
 export async function getSiteSettings(): Promise<SiteSettings> {
     try {
-        let settings = await prisma.siteSettings.findUnique({
-            where: { id: DEFAULT_SETTINGS_ID }
-        })
+        let settings = await withTimeout(
+            prisma.siteSettings.findUnique({
+                where: { id: DEFAULT_SETTINGS_ID }
+            }),
+            5000 // 5 second timeout
+        )
 
         if (!settings) {
             // Return default values if no settings exist

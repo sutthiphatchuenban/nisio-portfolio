@@ -48,11 +48,21 @@ export function MultiImageUpload({
             const formData = new FormData()
             formData.append("file", file)
 
-            const res = await axios.post("/api/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            })
+            try {
+                const res = await axios.post("/api/upload", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                })
 
-            return res.data.url
+                return res.data.url
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    const status = error.response?.status
+                    const message = error.response?.data?.message || error.message
+                    throw new Error(`Upload failed: ${message} (Status: ${status})`)
+                } else {
+                    throw new Error('Unknown upload error')
+                }
+            }
         })
 
         const results = await Promise.allSettled(uploadPromises)
