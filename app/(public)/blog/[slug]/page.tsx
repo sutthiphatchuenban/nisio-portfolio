@@ -4,8 +4,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, CalendarDays, Clock, Eye, Share2 } from "lucide-react"
+import { ArrowLeft, CalendarDays, Clock, Eye } from "lucide-react"
 import { ImageCarousel } from "@/components/shared/ImageCarousel"
+import { ClickableImage } from "@/components/ui/clickable-image"
 import type { BlogPost } from "@/types"
 
 // Revalidate every 60 seconds for ISR (Incremental Static Regeneration)
@@ -158,13 +159,10 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                                 <div className="group rounded-lg border bg-card overflow-hidden hover:shadow-lg transition-shadow">
                                     {(relatedPost.images && relatedPost.images.length > 0 ? relatedPost.images[0] : relatedPost.coverImage) && (
                                         <div className="relative aspect-video overflow-hidden">
-                                            <Image
+                                            <ClickableImage
                                                 src={relatedPost.images && relatedPost.images.length > 0 ? relatedPost.images[0] : relatedPost.coverImage!}
                                                 alt={relatedPost.title}
-                                                fill
                                                 sizes="33vw"
-                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                unoptimized={true}
                                             />
                                         </div>
                                     )}
