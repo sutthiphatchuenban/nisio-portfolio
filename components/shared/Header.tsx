@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { LogOut, LayoutDashboard, LogIn, Menu } from "lucide-react"
 import { useSiteSettings } from "@/components/providers/site-settings-provider"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
@@ -78,51 +78,49 @@ export function Header() {
                 {/* Mobile Menu */}
                 <Sheet open={open} onOpenChange={setOpen}>
                     <SheetTrigger asChild>
-                        <Button variant="outline" size="icon" className="md:hidden">
+                        <Button variant="ghost" size="icon" className="md:hidden">
                             <Menu className="h-5 w-5" />
                             <span className="sr-only">Toggle Menu</span>
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-64">
-                        <SheetHeader className="border-b pb-4 mb-4">
-                            <SheetTitle>
-                                <Link
-                                    href="/"
-                                    className="flex items-center gap-2 font-semibold"
-                                    onClick={() => setOpen(false)}
-                                >
-                                    {settings?.siteName || "PORTX"}
-                                </Link>
-                            </SheetTitle>
-                        </SheetHeader>
-                        <nav className="flex flex-col gap-4">
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    onClick={() => setOpen(false)}
-                                    className="text-lg font-medium transition-colors hover:text-primary"
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                            <div className="border-t pt-4 mt-2">
+                    <SheetContent side="right" className="w-[280px] sm:w-[300px] bg-background border-l">
+                        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                        <div className="flex flex-col h-full">
+                            {/* Navigation Links */}
+                            <nav className="flex-1 py-6 px-4">
+                                <div className="space-y-1">
+                                    {navLinks.map((link) => (
+                                        <Link
+                                            key={link.href}
+                                            href={link.href}
+                                            onClick={() => setOpen(false)}
+                                            className="flex items-center py-3 text-base font-medium rounded-md transition-colors hover:text-primary"
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </nav>
+
+                            {/* Bottom Section */}
+                            <div className="border-t pt-4 space-y-3">
+                                {/* Admin Actions */}
                                 {status === "loading" ? (
-                                    <Button variant="ghost" size="sm" disabled className="w-full justify-start">
+                                    <Button variant="ghost" disabled className="w-full justify-start">
+                                        <span className="h-4 w-4 mr-2 animate-spin">⟳</span>
                                         Loading...
                                     </Button>
                                 ) : session ? (
-                                    <div className="flex flex-col gap-2">
+                                    <div className="space-y-1">
                                         <Link href="/admin/dashboard" onClick={() => setOpen(false)}>
-                                            <Button variant="ghost" size="sm" className="w-full justify-start">
+                                            <Button variant="ghost" className="w-full justify-start">
                                                 <LayoutDashboard className="mr-2 h-4 w-4" />
                                                 Dashboard
                                             </Button>
                                         </Link>
                                         <Button
                                             variant="ghost"
-                                            size="sm"
-                                            className="w-full justify-start"
+                                            className="w-full justify-start text-destructive hover:text-destructive"
                                             onClick={() => signOut({ callbackUrl: '/' })}
                                         >
                                             <LogOut className="mr-2 h-4 w-4" />
@@ -131,18 +129,20 @@ export function Header() {
                                     </div>
                                 ) : (
                                     <Link href="/admin/login" onClick={() => setOpen(false)}>
-                                        <Button variant="ghost" size="sm" className="w-full justify-start">
+                                        <Button variant="ghost" className="w-full justify-start">
                                             <LogIn className="mr-2 h-4 w-4" />
-                                            Admin
+                                            Admin Login
                                         </Button>
                                     </Link>
                                 )}
+
+                                {/* Theme Toggle */}
+                                <div className="flex items-center justify-between px-2 py-2">
+                                    <span className="text-sm text-muted-foreground">Theme</span>
+                                    <ThemeToggle />
+                                </div>
                             </div>
-                            <div className="border-t pt-4 mt-2 flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Theme</span>
-                                <ThemeToggle />
-                            </div>
-                        </nav>
+                        </div>
                     </SheetContent>
                 </Sheet>
             </div>

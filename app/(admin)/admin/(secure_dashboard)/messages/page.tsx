@@ -76,7 +76,7 @@ export default function AdminMessagesPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
             </div>
 
-            <div className="rounded-md border bg-white dark:bg-black p-1">
+            <div className="rounded-md border bg-card p-1">
                 <Table>
                     <TableHeader>
                         <TableRow>

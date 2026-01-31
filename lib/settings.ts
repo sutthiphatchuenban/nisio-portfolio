@@ -45,7 +45,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
             prisma.siteSettings.findUnique({
                 where: { id: DEFAULT_SETTINGS_ID }
             }),
-            5000 // 5 second timeout
+            15000 // 15 second timeout for cold starts
         )
 
         if (!settings) {

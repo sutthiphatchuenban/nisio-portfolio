@@ -128,11 +128,11 @@ export default async function AboutPage() {
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Bio */}
-                    <section>
+                    <section className="overflow-hidden">
                         <h2 className="text-3xl font-bold mb-4">About Me</h2>
-                        <div className="prose dark:prose-invert max-w-none">
+                        <div className="prose dark:prose-invert max-w-none prose-p:break-words prose-headings:break-words prose-a:break-all">
                             {settings.bio ? (
-                                <div className="text-lg text-muted-foreground">
+                                <div className="text-lg text-muted-foreground leading-relaxed break-all">
                                     <ReactMarkdown>
                                         {settings.bio}
                                     </ReactMarkdown>

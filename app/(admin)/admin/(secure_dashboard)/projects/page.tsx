@@ -313,7 +313,7 @@ export default function AdminProjectsPage() {
                 </DialogContent>
             </Dialog>
 
-            <div className="rounded-md border bg-white dark:bg-black p-1">
+            <div className="rounded-md border bg-card p-1">
                 <Table>
                     <TableHeader>
                         <TableRow>
