@@ -61,7 +61,8 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
                 githubUrl: body.githubUrl,
                 technologies: body.technologies,
                 categoryId: body.categoryId,
-                featured: body.featured
+                featured: body.featured,
+                status: body.status
             },
             include: { category: true }
         })

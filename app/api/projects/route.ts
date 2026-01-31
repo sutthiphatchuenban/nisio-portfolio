@@ -87,7 +87,8 @@ export async function POST(request: Request) {
                 githubUrl: body.githubUrl,
                 technologies: body.technologies,
                 categoryId: body.categoryId,
-                featured: body.featured || false
+                featured: body.featured || false,
+                status: body.status || 'draft'
             },
             include: { category: true }
         })

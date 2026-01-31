@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const { id } = await params
     
     const project = await prisma.project.findUnique({
-        where: { id },
+        where: { id, status: 'published' },
         include: { category: true }
     })
 
@@ -73,7 +73,7 @@ export const revalidate = 0
 
 async function getProject(id: string) {
     const project = await prisma.project.findUnique({
-        where: { id },
+        where: { id, status: 'published' },
         include: { category: true }
     })
 

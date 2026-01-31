@@ -61,7 +61,7 @@ export const revalidate = 0
 async function getFeaturedProjects() {
     try {
         const projects = await prisma.project.findMany({
-            where: { featured: true },
+            where: { featured: true, status: 'published' },
             orderBy: { createdAt: 'desc' },
             take: 6,
             include: { category: true }

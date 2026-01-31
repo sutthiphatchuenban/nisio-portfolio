@@ -52,6 +52,7 @@ const projectSchema = z.object({
     githubUrl: z.string().optional(),
     technologies: z.string().min(1, "Technologies are required (comma separated)"),
     featured: z.boolean(),
+    status: z.enum(["draft", "published", "archived"]),
 })
 
 type ProjectFormValues = z.infer<typeof projectSchema>
@@ -74,6 +75,7 @@ export default function AdminProjectsPage() {
             githubUrl: "",
             technologies: "",
             featured: false,
+            status: "draft",
         },
     })
 
@@ -128,6 +130,7 @@ export default function AdminProjectsPage() {
             githubUrl: project.githubUrl || "",
             technologies: project.technologies.join(", "),
             featured: project.featured,
+            status: (project.status as "draft" | "published" | "archived") || "draft",
         })
         setIsOpen(true)
     }
@@ -280,6 +283,26 @@ export default function AdminProjectsPage() {
                                         <FormLabel>Technologies (Comma separated)</FormLabel>
                                         <FormControl>
                                             <Input placeholder="React, Next.js, TypeScript" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Status</FormLabel>
+                                        <FormControl>
+                                            <select
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                {...field}
+                                            >
+                                                <option value="draft">Draft</option>
+                                                <option value="published">Published</option>
+                                                <option value="archived">Archived</option>
+                                            </select>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

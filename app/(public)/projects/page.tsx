@@ -56,6 +56,7 @@ export const revalidate = 0
 
 async function getProjects() {
     const projects = await prisma.project.findMany({
+        where: { status: 'published' },
         orderBy: { createdAt: 'desc' },
         include: { category: true }
     })
