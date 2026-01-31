@@ -5,6 +5,50 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { CalendarDays, Clock, Eye, ArrowRight } from "lucide-react"
 import type { BlogPost } from "@/types"
+import type { Metadata } from "next"
+import { siteConfig, getAbsoluteUrl } from "@/lib/config"
+
+// SEO Metadata for Blog Page
+export const metadata: Metadata = {
+    title: "Blog",
+    description: `Read my latest articles about web development, programming tutorials, and insights from my journey as a developer.`,
+    keywords: [
+        "blog",
+        "developer blog",
+        "web development blog",
+        "programming tutorials",
+        "coding blog",
+        "tech blog",
+        "javascript tutorials",
+        "react tutorials",
+        "nextjs tutorials",
+        "web development tips",
+        ...siteConfig.keywords,
+    ],
+    alternates: {
+        canonical: getAbsoluteUrl("/blog"),
+    },
+    openGraph: {
+        title: `Blog | ${siteConfig.name}`,
+        description: "Thoughts, tutorials, and insights about web development and programming.",
+        url: getAbsoluteUrl("/blog"),
+        type: "website",
+        images: [
+            {
+                url: "/og-image.png",
+                width: 1200,
+                height: 630,
+                alt: `${siteConfig.name} - Blog`,
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: `Blog | ${siteConfig.name}`,
+        description: "Thoughts, tutorials, and insights about web development and programming.",
+        images: ["/og-image.png"],
+    },
+}
 
 // Revalidate every 60 seconds for ISR (Incremental Static Regeneration)
 export const revalidate = 0
@@ -104,52 +148,59 @@ export default async function BlogPage() {
                         </section>
                     )}
 
-                    {/* All Posts */}
-                    <section>
-                        {featuredPosts.length > 0 && <h2 className="text-2xl font-bold mb-6">All Posts</h2>}
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {regularPosts.map((post) => (
-                                <Link key={post.id} href={`/blog/${post.slug}`}>
-                                    <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow group theme-card hextech-border">
-                                        {(post.images && post.images.length > 0 ? post.images[0] : post.coverImage) && (
-                                            <div className="relative aspect-video overflow-hidden">
-                                                <Image
-                                                    src={post.images && post.images.length > 0 ? post.images[0] : post.coverImage!}
-                                                    alt={post.title}
-                                                    fill
-                                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                    unoptimized={true}
-                                                />
-                                            </div>
-                                        )}
-                                        <CardHeader className="pb-2">
-                                            <h3 className="font-bold group-hover:text-primary transition-colors line-clamp-2">
-                                                {post.title}
-                                            </h3>
-                                        </CardHeader>
-                                        <CardContent className="pb-2">
-                                            {post.excerpt && (
-                                                <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                    {/* Regular Posts */}
+                    {regularPosts.length > 0 && (
+                        <section>
+                            <h2 className="text-2xl font-bold mb-6">Latest Articles</h2>
+                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                {regularPosts.map((post) => (
+                                    <Link key={post.id} href={`/blog/${post.slug}`}>
+                                        <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow group theme-card hextech-border">
+                                            {(post.images && post.images.length > 0 ? post.images[0] : post.coverImage) && (
+                                                <div className="relative aspect-video overflow-hidden">
+                                                    <Image
+                                                        src={post.images && post.images.length > 0 ? post.images[0] : post.coverImage!}
+                                                        alt={post.title}
+                                                        fill
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        unoptimized={true}
+                                                    />
+                                                </div>
                                             )}
-                                        </CardContent>
-                                        <CardFooter className="text-xs text-muted-foreground pt-0">
-                                            <div className="flex items-center gap-3">
-                                                <span className="flex items-center gap-1">
-                                                    <CalendarDays className="h-3 w-3" />
-                                                    {new Date(post.createdAt).toLocaleDateString()}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="h-3 w-3" />
-                                                    {estimateReadTime(post.content)} min
-                                                </span>
-                                            </div>
-                                        </CardFooter>
-                                    </Card>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
+                                            <CardHeader>
+                                                <h3 className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-2">
+                                                    {post.title}
+                                                </h3>
+                                            </CardHeader>
+                                            <CardContent>
+                                                {post.excerpt && (
+                                                    <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                                                )}
+                                                <div className="flex flex-wrap gap-2 mt-3">
+                                                    {post.tags.slice(0, 3).map((tag) => (
+                                                        <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                                                    ))}
+                                                </div>
+                                            </CardContent>
+                                            <CardFooter className="text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="flex items-center gap-1">
+                                                        <CalendarDays className="h-4 w-4" />
+                                                        {new Date(post.createdAt).toLocaleDateString()}
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <Clock className="h-4 w-4" />
+                                                        {estimateReadTime(post.content)} min
+                                                    </span>
+                                                </div>
+                                            </CardFooter>
+                                        </Card>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </div>
             )}
         </div>

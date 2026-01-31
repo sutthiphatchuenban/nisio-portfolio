@@ -7,6 +7,52 @@ import type { Project, Skill, BlogPost } from "@/types"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles, Code2, PenTool, Wrench, Mail } from "lucide-react"
+import type { Metadata } from "next"
+import { siteConfig, getAbsoluteUrl } from "@/lib/config"
+import { getSiteSettings } from "@/lib/settings"
+
+// SEO Metadata for Home Page
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings()
+    const siteName = settings.siteName || siteConfig.name
+    const description = settings.siteDescription || siteConfig.description
+
+    return {
+        title: siteName,
+        description: description,
+        keywords: [
+            ...siteConfig.keywords,
+            "portfolio website",
+            "developer portfolio",
+            "web developer portfolio",
+            "software engineer portfolio",
+            "creative developer",
+        ],
+        alternates: {
+            canonical: getAbsoluteUrl("/"),
+        },
+        openGraph: {
+            title: siteName,
+            description: description,
+            url: getAbsoluteUrl("/"),
+            type: "website",
+            images: [
+                {
+                    url: "/og-image.png",
+                    width: 1200,
+                    height: 630,
+                    alt: siteName,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: siteName,
+            description: description,
+            images: ["/og-image.png"],
+        },
+    }
+}
 
 // Disable caching - always fetch fresh data from database
 export const revalidate = 0
@@ -50,6 +96,18 @@ async function getSkills() {
     } catch (error) {
         console.error('Failed to fetch skills:', error)
         return []
+    }
+}
+
+async function getSettings() {
+    try {
+        const settings = await prisma.siteSettings.findUnique({
+            where: { id: 'default' }
+        })
+        return settings
+    } catch (error) {
+        console.error('Failed to fetch settings:', error)
+        return null
     }
 }
 
@@ -156,120 +214,194 @@ function CTASection() {
     )
 }
 
+// JSON-LD Structured Data Component
+function JsonLd({ settings, projects }: { settings: any, projects: Project[] }) {
+    const personSchema = {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": settings?.name || siteConfig.author.name,
+        "jobTitle": settings?.title || "Full Stack Developer",
+        "description": settings?.bio || siteConfig.description,
+        "url": siteConfig.url,
+        "sameAs": [
+            settings?.githubUrl || siteConfig.social.github,
+            settings?.linkedinUrl || siteConfig.social.linkedin,
+            settings?.twitterUrl || siteConfig.social.twitter,
+        ].filter(Boolean),
+        "image": settings?.avatar || `${siteConfig.url}/og-image.png`,
+        "worksFor": {
+            "@type": "Organization",
+            "name": "Freelance"
+        },
+    }
+
+    const websiteSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": settings?.siteName || siteConfig.name,
+        "description": settings?.siteDescription || siteConfig.description,
+        "url": siteConfig.url,
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": `${siteConfig.url}/search?q={search_term_string}`
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+
+    const portfolioSchema = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": `Portfolio - ${settings?.siteName || siteConfig.name}`,
+        "description": `Featured projects by ${settings?.name || siteConfig.author.name}`,
+        "url": `${siteConfig.url}/projects`,
+        "hasPart": projects.slice(0, 6).map((project) => ({
+            "@type": "CreativeWork",
+            "name": project.title,
+            "description": project.description,
+            "url": `${siteConfig.url}/projects/${project.id}`,
+            "image": project.imageUrl || (project.images && project.images[0]) || `${siteConfig.url}/og-image.png`,
+        })),
+    }
+
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioSchema) }}
+            />
+        </>
+    )
+}
+
 // Main Page Component
 export default async function HomePage() {
     const featuredProjects = await getFeaturedProjects()
     const featuredBlogPosts = await getFeaturedBlogPosts()
     const skills = await getSkills()
+    const settings = await getSettings()
 
     return (
-        <div className="min-h-screen">
-            {/* Hero Section */}
-            <Hero />
+        <>
+            <JsonLd settings={settings} projects={featuredProjects} />
+            <div className="min-h-screen">
+                {/* Hero Section */}
+                <Hero />
 
-            {/* Featured Blog Posts Section */}
-            {featuredBlogPosts.length > 0 && (
-                <section className="py-24 relative">
-                    <div className="container">
+                {/* Featured Blog Posts Section */}
+                {featuredBlogPosts.length > 0 && (
+                    <section className="py-24 relative">
+                        <div className="container">
+                            <SectionHeader 
+                                icon={PenTool}
+                                title="Latest Articles"
+                                subtitle="Thoughts, tutorials, and insights from my journey as a developer"
+                                href="/blog"
+                                delay={0.1}
+                            />
+
+                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                {featuredBlogPosts.map((post, index) => (
+                                    <AnimatedBlogCard 
+                                        key={post.id} 
+                                        post={post} 
+                                        priority={index < 3}
+                                        index={index}
+                                        featured={index === 0}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                {/* Featured Projects Section */}
+                <section className="py-24 relative bg-muted/30">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-[0.02]">
+                        <div 
+                            className="w-full h-full"
+                            style={{
+                                backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+                                backgroundSize: '40px 40px',
+                            }}
+                        />
+                    </div>
+
+                    <div className="container relative z-10">
                         <SectionHeader 
-                            icon={PenTool}
-                            title="Latest Articles"
-                            subtitle="Thoughts, tutorials, and insights from my journey as a developer"
-                            href="/blog"
+                            icon={Code2}
+                            title="Featured Projects"
+                            subtitle="A selection of my best work, showcasing creativity and technical expertise"
+                            href="/projects"
                             delay={0.1}
                         />
 
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {featuredBlogPosts.map((post, index) => (
-                                <AnimatedBlogCard 
-                                    key={post.id} 
-                                    post={post} 
-                                    priority={index < 3}
-                                    index={index}
-                                    featured={index === 0}
-                                />
-                            ))}
-                        </div>
+                        {featuredProjects.length === 0 ? (
+                            <div className="text-center py-20 text-muted-foreground border-2 border-dashed rounded-2xl bg-muted/30">
+                                <div className="text-6xl mb-4">🚀</div>
+                                <p className="text-xl font-medium">No featured projects yet</p>
+                                <p className="text-sm mt-2">Mark projects as "Featured" in the admin panel</p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                {featuredProjects.map((project, index) => (
+                                    <AnimatedProjectCard 
+                                        key={project.id} 
+                                        project={project} 
+                                        priority={index < 3}
+                                        index={index}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </section>
-            )}
 
-            {/* Featured Projects Section */}
-            <section className="py-24 relative bg-muted/30">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.02]">
-                    <div 
-                        className="w-full h-full"
-                        style={{
-                            backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-                            backgroundSize: '40px 40px',
-                        }}
-                    />
-                </div>
+                {/* Skills Section */}
+                <section className="py-24 relative">
+                    <div className="container">
+                        <SectionHeader 
+                            icon={Wrench}
+                            title="Skills & Technologies"
+                            subtitle="Tools and technologies I use to bring ideas to life"
+                            href="/skills"
+                            delay={0.1}
+                        />
 
-                <div className="container relative z-10">
-                    <SectionHeader 
-                        icon={Code2}
-                        title="Featured Projects"
-                        subtitle="A selection of my best work, showcasing creativity and technical expertise"
-                        href="/projects"
-                        delay={0.1}
-                    />
+                        {skills.length === 0 ? (
+                            <div className="text-center py-20 text-muted-foreground border-2 border-dashed rounded-2xl bg-muted/30">
+                                <div className="text-6xl mb-4">🛠️</div>
+                                <p className="text-xl font-medium">No skills added yet</p>
+                                <p className="text-sm mt-2">Add your skills in the admin panel</p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                {skills.map((skill, index) => (
+                                    <AnimatedSkillCard 
+                                        key={skill.id} 
+                                        skill={skill}
+                                        index={index}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
 
-                    {featuredProjects.length === 0 ? (
-                        <div className="text-center py-20 text-muted-foreground border-2 border-dashed rounded-2xl bg-muted/30">
-                            <div className="text-6xl mb-4">🚀</div>
-                            <p className="text-xl font-medium">No featured projects yet</p>
-                            <p className="text-sm mt-2">Mark projects as "Featured" in the admin panel</p>
-                        </div>
-                    ) : (
-                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {featuredProjects.map((project, index) => (
-                                <AnimatedProjectCard 
-                                    key={project.id} 
-                                    project={project} 
-                                    priority={index < 3}
-                                    index={index}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            {/* Skills Section */}
-            <section className="py-24 relative">
-                <div className="container">
-                    <SectionHeader 
-                        icon={Wrench}
-                        title="Skills & Technologies"
-                        subtitle="Tools and technologies I use to bring ideas to life"
-                        href="/skills"
-                        delay={0.1}
-                    />
-
-                    {skills.length === 0 ? (
-                        <div className="text-center py-20 text-muted-foreground border-2 border-dashed rounded-2xl bg-muted/30">
-                            <div className="text-6xl mb-4">🛠️</div>
-                            <p className="text-xl font-medium">No skills added yet</p>
-                            <p className="text-sm mt-2">Add your skills in the admin panel</p>
-                        </div>
-                    ) : (
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            {skills.map((skill, index) => (
-                                <AnimatedSkillCard 
-                                    key={skill.id} 
-                                    skill={skill}
-                                    index={index}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <CTASection />
-        </div>
+                {/* CTA Section */}
+                <CTASection />
+            </div>
+        </>
     )
 }
