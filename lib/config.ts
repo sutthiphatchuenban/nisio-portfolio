@@ -49,8 +49,8 @@ export const siteConfig = {
         siteName: "PORTX",
     },
 
-    // Default OG Image (use existing hero image)
-    ogImage: "/hero_bg.jpg",
+    // Default OG Image
+    ogImage: "/og-image.png",
 }
 
 // Helper function to generate page title

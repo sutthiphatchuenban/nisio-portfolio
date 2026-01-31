@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const siteUrl = siteConfig.url;
     const siteName = settings.siteName || siteConfig.name;
     const description = settings.siteDescription || siteConfig.description;
-    const ogImage = (settings as any)?.heroImage || siteConfig.ogImage || "/hero_bg.jpg";
+    const ogImage = (settings as any)?.heroImage || siteConfig.ogImage || "/og-image.png";
 
     return {
         metadataBase: new URL(siteUrl),
