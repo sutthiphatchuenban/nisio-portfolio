@@ -7,47 +7,53 @@ import { CalendarDays, Clock, Eye, ArrowRight } from "lucide-react"
 import type { BlogPost } from "@/types"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
+import { getSiteSettings } from "@/lib/settings"
 
-// SEO Metadata for Blog Page
-export const metadata: Metadata = {
-    title: "Blog",
-    description: `Read my latest articles about web development, programming tutorials, and insights from my journey as a developer.`,
-    keywords: [
-        "blog",
-        "developer blog",
-        "web development blog",
-        "programming tutorials",
-        "coding blog",
-        "tech blog",
-        "javascript tutorials",
-        "react tutorials",
-        "nextjs tutorials",
-        "web development tips",
-        ...siteConfig.keywords,
-    ],
-    alternates: {
-        canonical: getAbsoluteUrl("/blog"),
-    },
-    openGraph: {
-        title: `Blog | ${siteConfig.name}`,
-        description: "Thoughts, tutorials, and insights about web development and programming.",
-        url: getAbsoluteUrl("/blog"),
-        type: "website",
-        images: [
-            {
-                url: "/og-image.png",
-                width: 1200,
-                height: 630,
-                alt: `${siteConfig.name} - Blog`,
-            },
+// SEO Metadata for Blog Page - Dynamic from database
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings()
+    const ogImage = (settings as any)?.heroImage || "/hero_bg.jpg"
+
+    return {
+        title: "Blog",
+        description: `Read my latest articles about web development, programming tutorials, and insights from my journey as a developer.`,
+        keywords: [
+            "blog",
+            "developer blog",
+            "web development blog",
+            "programming tutorials",
+            "coding blog",
+            "tech blog",
+            "javascript tutorials",
+            "react tutorials",
+            "nextjs tutorials",
+            "web development tips",
+            ...siteConfig.keywords,
         ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: `Blog | ${siteConfig.name}`,
-        description: "Thoughts, tutorials, and insights about web development and programming.",
-        images: ["/og-image.png"],
-    },
+        alternates: {
+            canonical: getAbsoluteUrl("/blog"),
+        },
+        openGraph: {
+            title: `Blog | ${siteConfig.name}`,
+            description: "Thoughts, tutorials, and insights about web development and programming.",
+            url: getAbsoluteUrl("/blog"),
+            type: "website",
+            images: [
+                {
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: `${siteConfig.name} - Blog`,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: `Blog | ${siteConfig.name}`,
+            description: "Thoughts, tutorials, and insights about web development and programming.",
+            images: [ogImage],
+        },
+    }
 }
 
 // Revalidate every 60 seconds for ISR (Incremental Static Regeneration)

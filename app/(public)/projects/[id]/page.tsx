@@ -91,8 +91,8 @@ async function getProject(id: string) {
 // JSON-LD Structured Data for Project
 function ProjectJsonLd({ project }: { project: Project }) {
     const imageUrl = project.images.length > 0 
-        ? project.images[0] 
-        : project.imageUrl || `${siteConfig.url}/og-image.png`
+        ? project.images[0]
+        : project.imageUrl || `${siteConfig.url}/hero_bg.jpg`
 
     const projectSchema = {
         "@context": "https://schema.org",

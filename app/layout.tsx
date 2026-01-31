@@ -30,6 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const siteUrl = siteConfig.url;
     const siteName = settings.siteName || siteConfig.name;
     const description = settings.siteDescription || siteConfig.description;
+    const ogImage = (settings as any)?.heroImage || siteConfig.ogImage || "/hero_bg.jpg";
 
     return {
         metadataBase: new URL(siteUrl),
@@ -62,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
             description: description,
             images: [
                 {
-                    url: "/og-image.png",
+                    url: ogImage,
                     width: 1200,
                     height: 630,
                     alt: siteName,
@@ -73,7 +74,7 @@ export async function generateMetadata(): Promise<Metadata> {
             card: "summary_large_image",
             title: siteName,
             description: description,
-            images: ["/og-image.png"],
+            images: [ogImage],
             creator: siteConfig.author.twitter,
         },
         alternates: {

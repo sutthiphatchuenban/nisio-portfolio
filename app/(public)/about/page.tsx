@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
             type: "profile",
             images: [
                 {
-                    url: settings?.avatar || "/og-image.png",
+                    url: settings?.avatar || "/hero_bg.jpg",
                     width: 1200,
                     height: 630,
                     alt: `${name} - ${title}`,
@@ -54,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
             card: "summary_large_image",
             title: `About | ${siteConfig.name}`,
             description: `Learn more about ${name}, ${title}.`,
-            images: [settings?.avatar || "/og-image.png"],
+            images: [settings?.avatar || "/hero_bg.jpg"],
         },
     }
 }

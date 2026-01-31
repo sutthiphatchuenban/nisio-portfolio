@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
             type: "website",
             images: [
                 {
-                    url: "/og-image.png",
+                    url: "/hero_bg.jpg",
                     width: 1200,
                     height: 630,
                     alt: siteName,
@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
             card: "summary_large_image",
             title: siteName,
             description: description,
-            images: ["/og-image.png"],
+            images: ["/hero_bg.jpg"],
         },
     }
 }
@@ -228,7 +228,7 @@ function JsonLd({ settings, projects }: { settings: any, projects: Project[] }) 
             settings?.linkedinUrl || siteConfig.social.linkedin,
             settings?.twitterUrl || siteConfig.social.twitter,
         ].filter(Boolean),
-        "image": settings?.avatar || `${siteConfig.url}/og-image.png`,
+        "image": settings?.avatar || `${siteConfig.url}/hero_bg.jpg`,
         "worksFor": {
             "@type": "Organization",
             "name": "Freelance"
@@ -262,7 +262,7 @@ function JsonLd({ settings, projects }: { settings: any, projects: Project[] }) 
             "name": project.title,
             "description": project.description,
             "url": `${siteConfig.url}/projects/${project.id}`,
-            "image": project.imageUrl || (project.images && project.images[0]) || `${siteConfig.url}/og-image.png`,
+            "image": project.imageUrl || (project.images && project.images[0]) || `${siteConfig.url}/hero_bg.jpg`,
         })),
     }
 

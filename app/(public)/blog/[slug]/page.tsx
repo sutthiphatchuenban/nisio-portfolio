@@ -127,8 +127,8 @@ function estimateReadTime(content: string): number {
 // JSON-LD Structured Data for Blog Post
 function BlogPostJsonLd({ post }: { post: BlogPost }) {
     const imageUrl = post.images && post.images.length > 0 
-        ? post.images[0] 
-        : post.coverImage || `${siteConfig.url}/og-image.png`
+        ? post.images[0]
+        : post.coverImage || `${siteConfig.url}/hero_bg.jpg`
 
     const blogPostSchema = {
         "@context": "https://schema.org",
@@ -148,7 +148,7 @@ function BlogPostJsonLd({ post }: { post: BlogPost }) {
             "name": siteConfig.name,
             "logo": {
                 "@type": "ImageObject",
-                "url": `${siteConfig.url}/og-image.png`,
+                "url": `${siteConfig.url}/hero_bg.jpg`,
             },
         },
         "mainEntityOfPage": {

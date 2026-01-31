@@ -1,45 +1,51 @@
 import { ContactForm } from "@/components/contact/ContactForm"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
+import { getSiteSettings } from "@/lib/settings"
 
-// SEO Metadata for Contact Page
-export const metadata: Metadata = {
-    title: "Contact",
-    description: `Get in touch with me for project inquiries, collaborations, or just to say hello. I'd love to hear from you!`,
-    keywords: [
-        "contact",
-        "get in touch",
-        "hire me",
-        "freelance developer",
-        "web developer contact",
-        "software engineer contact",
-        "collaboration",
-        "project inquiry",
-        ...siteConfig.keywords,
-    ],
-    alternates: {
-        canonical: getAbsoluteUrl("/contact"),
-    },
-    openGraph: {
-        title: `Contact | ${siteConfig.name}`,
-        description: "Get in touch with me for project inquiries, collaborations, or just to say hello.",
-        url: getAbsoluteUrl("/contact"),
-        type: "website",
-        images: [
-            {
-                url: "/og-image.png",
-                width: 1200,
-                height: 630,
-                alt: `${siteConfig.name} - Contact`,
-            },
+// SEO Metadata for Contact Page - Dynamic from database
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings()
+    const ogImage = (settings as any)?.heroImage || "/hero_bg.jpg"
+
+    return {
+        title: "Contact",
+        description: `Get in touch with me for project inquiries, collaborations, or just to say hello. I'd love to hear from you!`,
+        keywords: [
+            "contact",
+            "get in touch",
+            "hire me",
+            "freelance developer",
+            "web developer contact",
+            "software engineer contact",
+            "collaboration",
+            "project inquiry",
+            ...siteConfig.keywords,
         ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: `Contact | ${siteConfig.name}`,
-        description: "Get in touch with me for project inquiries, collaborations, or just to say hello.",
-        images: ["/og-image.png"],
-    },
+        alternates: {
+            canonical: getAbsoluteUrl("/contact"),
+        },
+        openGraph: {
+            title: `Contact | ${siteConfig.name}`,
+            description: "Get in touch with me for project inquiries, collaborations, or just to say hello.",
+            url: getAbsoluteUrl("/contact"),
+            type: "website",
+            images: [
+                {
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: `${siteConfig.name} - Contact`,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: `Contact | ${siteConfig.name}`,
+            description: "Get in touch with me for project inquiries, collaborations, or just to say hello.",
+            images: [ogImage],
+        },
+    }
 }
 
 // JSON-LD Structured Data for Contact Page

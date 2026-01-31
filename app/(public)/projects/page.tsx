@@ -3,46 +3,52 @@ import prisma from "@/lib/prisma"
 import type { Project, Category } from "@/types"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
+import { getSiteSettings } from "@/lib/settings"
 
-// SEO Metadata for Projects Page
-export const metadata: Metadata = {
-    title: "Projects",
-    description: `Explore my portfolio of web development projects. A collection of work ranging from web applications to open source libraries built with modern technologies.`,
-    keywords: [
-        "projects",
-        "portfolio projects",
-        "web development projects",
-        "software projects",
-        "github projects",
-        "javascript projects",
-        "react projects",
-        "nextjs projects",
-        "full stack projects",
-        ...siteConfig.keywords,
-    ],
-    alternates: {
-        canonical: getAbsoluteUrl("/projects"),
-    },
-    openGraph: {
-        title: `Projects | ${siteConfig.name}`,
-        description: "Explore my portfolio of web development projects showcasing creativity and technical expertise.",
-        url: getAbsoluteUrl("/projects"),
-        type: "website",
-        images: [
-            {
-                url: "/og-image.png",
-                width: 1200,
-                height: 630,
-                alt: `${siteConfig.name} - Projects`,
-            },
+// SEO Metadata for Projects Page - Dynamic from database
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings()
+    const ogImage = (settings as any)?.heroImage || "/hero_bg.jpg"
+
+    return {
+        title: "Projects",
+        description: `Explore my portfolio of web development projects. A collection of work ranging from web applications to open source libraries built with modern technologies.`,
+        keywords: [
+            "projects",
+            "portfolio projects",
+            "web development projects",
+            "software projects",
+            "github projects",
+            "javascript projects",
+            "react projects",
+            "nextjs projects",
+            "full stack projects",
+            ...siteConfig.keywords,
         ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: `Projects | ${siteConfig.name}`,
-        description: "Explore my portfolio of web development projects showcasing creativity and technical expertise.",
-        images: ["/og-image.png"],
-    },
+        alternates: {
+            canonical: getAbsoluteUrl("/projects"),
+        },
+        openGraph: {
+            title: `Projects | ${siteConfig.name}`,
+            description: "Explore my portfolio of web development projects showcasing creativity and technical expertise.",
+            url: getAbsoluteUrl("/projects"),
+            type: "website",
+            images: [
+                {
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: `${siteConfig.name} - Projects`,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: `Projects | ${siteConfig.name}`,
+            description: "Explore my portfolio of web development projects showcasing creativity and technical expertise.",
+            images: [ogImage],
+        },
+    }
 }
 
 // Disable caching - always fetch fresh data from database
