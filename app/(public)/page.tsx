@@ -16,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const settings = await getSiteSettings()
     const siteName = settings.siteName || siteConfig.name
     const description = settings.siteDescription || siteConfig.description
+    const ogImage = (settings as any)?.heroImage || siteConfig.ogImage || "/og-image.png"
 
     return {
         title: siteName,
@@ -38,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
             type: "website",
             images: [
                 {
-                    url: "/hero_bg.jpg",
+                    url: ogImage,
                     width: 1200,
                     height: 630,
                     alt: siteName,
@@ -49,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
             card: "summary_large_image",
             title: siteName,
             description: description,
-            images: ["/hero_bg.jpg"],
+            images: [ogImage],
         },
     }
 }
