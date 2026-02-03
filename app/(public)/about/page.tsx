@@ -148,68 +148,68 @@ export default async function AboutPage() {
     return (
         <>
             <JsonLd settings={settings} skills={skills} />
-            <div className="container py-10">
-                <div className="grid gap-10 lg:grid-cols-3">
+            <div className="container py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
+                <div className="grid gap-6 lg:gap-10 grid-cols-1 lg:grid-cols-3">
                     {/* Profile Card */}
                     <div className="lg:col-span-1">
-                        <Card className="sticky top-24">
-                            <CardContent className="pt-6">
+                        <Card className="lg:sticky lg:top-24">
+                            <CardContent className="pt-4 sm:pt-6">
                                 <div className="flex flex-col items-center text-center">
                                     {/* Avatar */}
-                                    <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden bg-muted border-4 border-background shadow-lg">
+                                    <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4 rounded-full overflow-hidden bg-muted border-4 border-background shadow-lg">
                                         {settings.avatar ? (
                                             <Image
                                                 src={settings.avatar}
                                                 alt={settings.name}
                                                 fill
-                                                sizes="128px"
+                                                sizes="(max-width: 640px) 96px, 128px"
                                                 className="object-cover"
                                                 priority
                                                 unoptimized={true}
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground">
+                                            <div className="w-full h-full flex items-center justify-center text-3xl sm:text-4xl font-bold text-muted-foreground">
                                                 {settings.name.slice(0, 2).toUpperCase()}
                                             </div>
                                         )}
                                     </div>
 
-                                    <h1 className="text-2xl font-bold">{settings.name}</h1>
-                                    <p className="text-muted-foreground">{settings.title}</p>
+                                    <h1 className="text-xl sm:text-2xl font-bold">{settings.name}</h1>
+                                    <p className="text-muted-foreground text-sm sm:text-base">{settings.title}</p>
 
                                     {settings.location && (
-                                        <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
-                                            <MapPin className="h-4 w-4" />
-                                            {settings.location}
+                                        <div className="flex items-center justify-center gap-1 mt-2 text-xs sm:text-sm text-muted-foreground">
+                                            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                                            <span>{settings.location}</span>
                                         </div>
                                     )}
 
                                     {/* Social Links */}
-                                    <div className="flex gap-2 mt-4">
+                                    <div className="flex flex-wrap justify-center gap-2 mt-4">
                                         {settings.githubUrl && (
                                             <Link href={settings.githubUrl} target="_blank" rel="noopener noreferrer">
-                                                <Button variant="outline" size="icon">
+                                                <Button variant="outline" size="icon" className="h-9 w-9 sm:h-10 sm:w-10">
                                                     <Github className="h-4 w-4" />
                                                 </Button>
                                             </Link>
                                         )}
                                         {settings.linkedinUrl && (
                                             <Link href={settings.linkedinUrl} target="_blank" rel="noopener noreferrer">
-                                                <Button variant="outline" size="icon">
+                                                <Button variant="outline" size="icon" className="h-9 w-9 sm:h-10 sm:w-10">
                                                     <Linkedin className="h-4 w-4" />
                                                 </Button>
                                             </Link>
                                         )}
                                         {settings.twitterUrl && (
                                             <Link href={settings.twitterUrl} target="_blank" rel="noopener noreferrer">
-                                                <Button variant="outline" size="icon">
+                                                <Button variant="outline" size="icon" className="h-9 w-9 sm:h-10 sm:w-10">
                                                     <Twitter className="h-4 w-4" />
                                                 </Button>
                                             </Link>
                                         )}
                                         {settings.email && (
                                             <Link href={`mailto:${settings.email}`}>
-                                                <Button variant="outline" size="icon">
+                                                <Button variant="outline" size="icon" className="h-9 w-9 sm:h-10 sm:w-10">
                                                     <Mail className="h-4 w-4" />
                                                 </Button>
                                             </Link>
@@ -219,7 +219,7 @@ export default async function AboutPage() {
                                     {/* Resume Button */}
                                     {settings.resumeUrl && (
                                         <Link href={settings.resumeUrl} target="_blank" rel="noopener noreferrer" className="mt-4 w-full">
-                                            <Button className="w-full" variant="outline">
+                                            <Button className="w-full sm:h-10" variant="outline" size="sm">
                                                 <FileText className="h-4 w-4 mr-2" />
                                                 Download Resume
                                             </Button>
@@ -231,13 +231,19 @@ export default async function AboutPage() {
                     </div>
 
                     {/* Bio & Skills */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="lg:col-span-2 space-y-6 sm:space-y-8">
                         {/* Bio Section */}
                         <section>
-                            <h2 className="text-2xl font-bold mb-4">About Me</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">About Me</h2>
                             {settings.bio ? (
-                                <div className="prose prose-zinc dark:prose-invert max-w-none">
-                                    <ReactMarkdown>{settings.bio}</ReactMarkdown>
+                                <div className="prose prose-zinc dark:prose-invert max-w-none prose-sm sm:prose-base">
+                                    <ReactMarkdown
+                                        components={{
+                                            a: ({...props}) => <a {...props} className="break-all" />
+                                        }}
+                                    >
+                                        {settings.bio}
+                                    </ReactMarkdown>
                                 </div>
                             ) : (
                                 <p className="text-muted-foreground">
@@ -249,11 +255,11 @@ export default async function AboutPage() {
                         {/* Skills Section */}
                         {skills.length > 0 && (
                             <section>
-                                <h2 className="text-2xl font-bold mb-4">Skills & Technologies</h2>
-                                <div className="flex flex-wrap gap-2">
+                                <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Skills & Technologies</h2>
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                                     {skills.map((skill) => (
-                                        <Badge key={skill.id} variant="secondary" className="text-sm px-3 py-1">
-                                            {skill.icon && <img src={skill.icon} alt={skill.name} className="mr-1 h-4 w-4 inline-block object-contain" />}
+                                        <Badge key={skill.id} variant="secondary" className="text-xs sm:text-sm px-2 sm:px-3 py-1">
+                                            {skill.icon && <img src={skill.icon} alt={skill.name} className="mr-1 h-3 w-3 sm:h-4 sm:w-4 inline-block object-contain" />}
                                             {skill.name}
                                         </Badge>
                                     ))}
@@ -262,13 +268,13 @@ export default async function AboutPage() {
                         )}
 
                         {/* Contact CTA */}
-                        <section className="bg-muted/50 rounded-lg p-6">
-                            <h2 className="text-xl font-bold mb-2">Let's Work Together</h2>
-                            <p className="text-muted-foreground mb-4">
+                        <section className="bg-muted/50 rounded-lg p-4 sm:p-6">
+                            <h2 className="text-lg sm:text-xl font-bold mb-2">Let's Work Together</h2>
+                            <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base">
                                 I'm always interested in hearing about new projects and opportunities.
                             </p>
-                            <Link href="/contact">
-                                <Button>
+                            <Link href="/contact" className="w-full sm:w-auto inline-block">
+                                <Button className="w-full sm:w-auto">
                                     Get in Touch
                                     <ExternalLink className="h-4 w-4 ml-2" />
                                 </Button>
