@@ -253,7 +253,7 @@ export default async function AboutPage() {
                                 <div className="flex flex-wrap gap-2">
                                     {skills.map((skill) => (
                                         <Badge key={skill.id} variant="secondary" className="text-sm px-3 py-1">
-                                            {skill.icon && <span className="mr-1">{skill.icon}</span>}
+                                            {skill.icon && <img src={skill.icon} alt={skill.name} className="mr-1 h-4 w-4 inline-block object-contain" />}
                                             {skill.name}
                                         </Badge>
                                     ))}

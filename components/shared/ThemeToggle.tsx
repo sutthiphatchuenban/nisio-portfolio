@@ -9,7 +9,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sun, Moon, Gamepad2, Zap, Flower2 } from "lucide-react"
+import { Sun, Moon, Gamepad2, Zap, Flower2, TreePine } from "lucide-react"
 
 const themes = [
     { value: "light", label: "Light", icon: Sun },
@@ -17,6 +17,7 @@ const themes = [
     { value: "lol", label: "League of Legends", icon: Gamepad2 },
     { value: "cyberpunk", label: "Cyberpunk", icon: Zap },
     { value: "sakura", label: "Sakura", icon: Flower2 },
+    { value: "christmas", label: "Christmas", icon: TreePine },
 ]
 
 export function ThemeToggle() {

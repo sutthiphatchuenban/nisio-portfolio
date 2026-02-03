@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, CalendarDays, Clock, Eye } from "lucide-react"
 import { ImageCarousel } from "@/components/shared/ImageCarousel"
 import { ClickableImage } from "@/components/ui/clickable-image"
+import ReactMarkdown from "react-markdown"
 import type { BlogPost } from "@/types"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
@@ -222,28 +223,8 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     />
 
                     {/* Content */}
-                    <div className="prose dark:prose-invert max-w-none">
-                        {post.content.split('\n').map((paragraph, i) => {
-                            if (paragraph.startsWith('# ')) {
-                                return <h1 key={i}>{paragraph.slice(2)}</h1>
-                            }
-                            if (paragraph.startsWith('## ')) {
-                                return <h2 key={i}>{paragraph.slice(3)}</h2>
-                            }
-                            if (paragraph.startsWith('### ')) {
-                                return <h3 key={i}>{paragraph.slice(4)}</h3>
-                            }
-                            if (paragraph.startsWith('- ')) {
-                                return <li key={i}>{paragraph.slice(2)}</li>
-                            }
-                            if (paragraph.startsWith('```')) {
-                                return <pre key={i} className="bg-muted p-4 rounded-lg overflow-x-auto"><code>{paragraph.slice(3)}</code></pre>
-                            }
-                            if (paragraph.trim() === '') {
-                                return <br key={i} />
-                            }
-                            return <p key={i}>{paragraph}</p>
-                        })}
+                    <div className="prose prose-zinc dark:prose-invert max-w-none">
+                        <ReactMarkdown>{post.content}</ReactMarkdown>
                     </div>
 
                     {/* Share / Back */}
