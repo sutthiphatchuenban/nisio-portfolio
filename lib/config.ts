@@ -3,16 +3,17 @@
 
 export const siteConfig = {
     // Default site name - can be changed in admin settings
-    name: "PORTX",
+    name: "NISIO PORTFOLIO",
 
     // Default site description - can be changed in admin settings
-    description: "Personal portfolio website showcasing projects, skills, and blog posts about web development.",
+    description: "ผลงานและประสบการณ์ของ สุทธิภัทร ชื่นบาน พัฒนาเว็บไซต์และแอพพลิเคชั่น | Full Stack Developer Portfolio showcasing projects and skills in web development.",
 
     // Site URL - your production domain
-    url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://nisio-portfolio.vercel.app",
 
     // SEO Keywords
     keywords: [
+        // English keywords
         "portfolio",
         "developer",
         "web developer",
@@ -26,12 +27,26 @@ export const siteConfig = {
         "typescript",
         "react",
         "nextjs",
-        "web development"
+        "web development",
+        "Sutthiphat Chuenban",
+        // Thai keywords
+        "สุทธิภัทร ชื่นบาน",
+        "นักพัฒนาเว็บ",
+        "โปรแกรมเมอร์",
+        "พอร์ตโฟลิโอ",
+        "พัฒนาเว็บไซต์",
+        "ฟูลสแต็ค",
+        "เว็บไซต์ส่วนตัว",
+        "ประสบการณ์ทำงาน",
+        "โปรเจค",
+        "จาวาสคริปต์",
+        "รีแอค",
+        "เน็กซ์เจเอส",
     ],
 
     // Author info
     author: {
-        name: "Your Name",
+        name: "สุทธิภัทร ชื่นบาน (Sutthiphat Chuenban)",
         twitter: "@yourhandle",
     },
 
@@ -45,8 +60,8 @@ export const siteConfig = {
     // Open Graph defaults
     og: {
         type: "website",
-        locale: "en_US",
-        siteName: "PORTX",
+        locale: "th_TH",
+        siteName: "NISIO PORTFOLIO",
     },
 
     // Default OG Image
