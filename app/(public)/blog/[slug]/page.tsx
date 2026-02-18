@@ -1,13 +1,12 @@
 import prisma from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CalendarDays, Clock, Eye } from "lucide-react"
 import { ImageCarousel } from "@/components/shared/ImageCarousel"
 import { ClickableImage } from "@/components/ui/clickable-image"
-import ReactMarkdown from "react-markdown"
+import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer"
 import type { BlogPost } from "@/types"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
@@ -223,9 +222,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     />
 
                     {/* Content */}
-                    <div className="prose prose-zinc dark:prose-invert max-w-none">
-                        <ReactMarkdown>{post.content}</ReactMarkdown>
-                    </div>
+                    <MarkdownRenderer content={post.content} className="max-w-none" />
 
                     {/* Share / Back */}
                     <div className="flex items-center justify-between pt-8 border-t">

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft, Github, Globe } from "lucide-react"
 import { ImageCarousel } from "@/components/shared/ImageCarousel"
-import ReactMarkdown from "react-markdown"
+import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer"
 import type { Project } from "@/types"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
@@ -188,13 +188,9 @@ export default async function ProjectDetailPage(props: { params: Promise<{ id: s
 
                     <div className="grid gap-10 md:grid-cols-[2fr_1fr]">
                         <div className="space-y-6">
-                            <div className="prose dark:prose-invert max-w-none">
+                            <div className="max-w-none">
                                 <h3 className="text-xl font-semibold mb-2">About the Project</h3>
-                                <div className="border-l-2 pl-4 border-muted leading-relaxed">
-                                    <ReactMarkdown>
-                                        {project.description}
-                                    </ReactMarkdown>
-                                </div>
+                                <MarkdownRenderer content={project.description} className="max-w-none" />
                             </div>
 
                             <div className="space-y-2">
