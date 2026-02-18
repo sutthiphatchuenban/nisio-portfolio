@@ -42,10 +42,10 @@ function decodeHtmlEntities(text: string): string {
     .replace(/>/g, '>')
     .replace(/&/g, '&')
     .replace(/"/g, '"')
-    .replace(/'/g, String.fromCharCode(39))
+    .replace(/'/g, "'")
     .replace(/&nbsp;/g, ' ')
     .replace(/&#x2F;/g, '/')
-    .replace(/&#x27;/g, String.fromCharCode(39))
+    .replace(/&#x27;/g, "'")
     .replace(/&#x60;/g, '`')
     .replace(/&#61;/g, '=')
     .replace(/&#62;/g, '>')
@@ -57,32 +57,53 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
   const decodedContent = decodeHtmlEntities(content);
 
   return (
-    <div className={`markdown-body ${className}`}>
+    <div className={`markdown-body ${className} overflow-x-hidden`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, [rehypeSanitize, customSchema]]}
         components={{
+          // Pre blocks (code blocks)
+          pre({ children }: any) {
+            return <>{children}</>;
+          },
           // Code blocks with syntax highlighting
           code({ node, inline, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || '');
-            return !inline && match ? (
-              <div className="my-4 rounded-lg overflow-hidden">
-                <div className="bg-muted/80 px-4 py-2 text-xs text-muted-foreground font-mono border-b border-border flex items-center justify-between">
-                  <span>{match[1]}</span>
-                  <span className="text-[10px] opacity-50">code</span>
-                </div>
-                <SyntaxHighlighter
-                  style={oneDark}
-                  language={match[1]}
-                  PreTag="div"
-                  customStyle={{ margin: 0, borderRadius: '0 0 0.5rem 0.5rem' }}
-                  {...props}
-                >
-                  {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
-              </div>
-            ) : (
-              <code className="bg-muted/80 px-1.5 py-0.5 rounded-md text-sm font-mono text-foreground border border-border/50" {...props}>
+            const codeString = String(children).replace(/\n$/, '');
+            
+            // Block-level code (```code```)
+            if (!inline) {
+              return (
+                <figure className="my-4 rounded-lg overflow-hidden">
+                  {match && (
+                    <figcaption className="bg-zinc-800 px-4 py-2 text-xs text-zinc-400 font-mono border-b border-zinc-700 flex items-center justify-between">
+                      <span>{match[1]}</span>
+                      <span className="text-[10px] opacity-50">code</span>
+                    </figcaption>
+                  )}
+                  <div className="overflow-x-auto bg-zinc-900">
+                    <SyntaxHighlighter
+                      style={oneDark}
+                      language={match ? match[1] : 'text'}
+                      PreTag="div"
+                      customStyle={{
+                        margin: 0,
+                        borderRadius: 0,
+                        fontSize: '0.8rem',
+                        background: 'transparent',
+                        padding: match ? undefined : '1rem'
+                      }}
+                      {...props}
+                    >
+                      {codeString}
+                    </SyntaxHighlighter>
+                  </div>
+                </figure>
+              );
+            }
+            // Inline code (`code`)
+            return (
+              <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-sm font-mono text-zinc-200" {...props}>
                 {children}
               </code>
             );

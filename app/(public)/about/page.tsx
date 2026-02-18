@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Github, Linkedin, Twitter, Mail, MapPin, FileText, ExternalLink } from "lucide-react"
 import Link from "next/link"
-import ReactMarkdown from "react-markdown"
+import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer"
 import type { Skill } from "@/types"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
@@ -236,15 +236,7 @@ export default async function AboutPage() {
                         <section>
                             <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">About Me</h2>
                             {settings.bio ? (
-                                <div className="prose prose-zinc dark:prose-invert max-w-none prose-sm sm:prose-base">
-                                    <ReactMarkdown
-                                        components={{
-                                            a: ({...props}) => <a {...props} className="break-all" />
-                                        }}
-                                    >
-                                        {settings.bio}
-                                    </ReactMarkdown>
-                                </div>
+                                <MarkdownRenderer content={settings.bio} className="prose-sm sm:prose-base" />
                             ) : (
                                 <p className="text-muted-foreground">
                                     No bio available yet.

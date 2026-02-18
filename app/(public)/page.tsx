@@ -301,7 +301,7 @@ export default async function HomePage() {
 
                 {/* Featured Blog Posts Section */}
                 {featuredBlogPosts.length > 0 && (
-                    <section className="py-24 relative">
+                    <section id="content" className="py-24 relative">
                         <div className="container">
                             <SectionHeader 
                                 icon={PenTool}
