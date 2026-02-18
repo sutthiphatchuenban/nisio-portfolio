@@ -31,7 +31,7 @@ export default function Hero() {
                 </p>
                 <div className="space-x-4 animate-in slide-in-from-bottom-4 duration-700 delay-300">
                     <Link href="/projects">
-                        <Button size="lg" className="rounded-full animate-bounce">View Projects</Button>
+                        <Button size="lg" className="rounded-full">View Projects</Button>
                     </Link>
                     <Link href="/contact">
                         <Button variant="outline" size="lg" className="rounded-full">Contact Me</Button>
@@ -40,7 +40,7 @@ export default function Hero() {
                 </div>
             </div>
             {/* Scroll Down Indicator */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+            <div className="absolute bottom-4 md:bottom-24 left-1/2 -translate-x-1/2 z-20 animate-bounce">
                 <Link href="#content" className="flex flex-col items-center text-white/70 hover:text-white transition-colors">
                     <span className="text-xs mb-1">Scroll</span>
                     <ChevronDown className="w-6 h-6" />
