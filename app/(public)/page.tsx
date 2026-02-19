@@ -1,15 +1,70 @@
+import dynamic from "next/dynamic"
+import { Suspense } from "react"
 import Hero from "@/components/home/Hero"
-import AnimatedProjectCard from "@/components/projects/AnimatedProjectCard"
-import AnimatedBlogCard from "@/components/blog/AnimatedBlogCard"
-import AnimatedSkillCard from "@/components/skills/AnimatedSkillCard"
 import prisma from "@/lib/prisma"
 import type { Project, Skill, BlogPost } from "@/types"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { ArrowRight, Sparkles, Code2, PenTool, Wrench, Mail } from "lucide-react"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
 import { getSiteSettings } from "@/lib/settings"
+
+// Dynamic imports for better performance
+const AnimatedProjectCard = dynamic(() => import("@/components/projects/AnimatedProjectCard"), {
+    loading: () => <ProjectCardSkeleton />,
+})
+const AnimatedBlogCard = dynamic(() => import("@/components/blog/AnimatedBlogCard"), {
+    loading: () => <BlogCardSkeleton />,
+})
+const AnimatedSkillCard = dynamic(() => import("@/components/skills/AnimatedSkillCard"), {
+    loading: () => <SkillCardSkeleton />,
+})
+
+// Loading skeletons
+function ProjectCardSkeleton() {
+    return (
+        <Card className="overflow-hidden">
+            <Skeleton className="aspect-video w-full" />
+            <CardContent className="p-4 space-y-3">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+                <div className="flex gap-2 pt-2">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+function BlogCardSkeleton() {
+    return (
+        <Card className="overflow-hidden">
+            <Skeleton className="aspect-video w-full" />
+            <CardContent className="p-4 space-y-3">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-1/2" />
+            </CardContent>
+        </Card>
+    )
+}
+
+function SkillCardSkeleton() {
+    return (
+        <Card className="p-4 space-y-3">
+            <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="h-5 w-24" />
+            </div>
+            <Skeleton className="h-2 w-full rounded-full" />
+        </Card>
+    )
+}
 
 // SEO Metadata for Home Page
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,7 +74,9 @@ export async function generateMetadata(): Promise<Metadata> {
     const ogImage = (settings as any)?.heroImage || siteConfig.ogImage || "/og-image.png"
 
     return {
-        title: siteName,
+        title: {
+            absolute: siteName,
+        },
         description: description,
         keywords: [
             ...siteConfig.keywords,
@@ -55,60 +112,50 @@ export async function generateMetadata(): Promise<Metadata> {
     }
 }
 
-// Disable caching - always fetch fresh data from database
+// No caching - always fetch fresh data from database
 export const revalidate = 0
 
-async function getFeaturedProjects() {
+async function getHomePageData() {
     try {
-        const projects = await prisma.project.findMany({
-            where: { featured: true, status: 'published' },
-            orderBy: { createdAt: 'desc' },
-            take: 6,
-            include: { category: true }
-        })
-        return projects as unknown as Project[]
-    } catch (error) {
-        console.error('Failed to fetch featured projects:', error)
-        return []
-    }
-}
+        const [projects, posts, skills, settings] = await Promise.all([
+            // Featured Projects
+            prisma.project.findMany({
+                where: { featured: true, status: 'published' },
+                orderBy: { createdAt: 'desc' },
+                take: 6,
+                include: { category: true }
+            }),
+            // Featured Blog Posts
+            prisma.blogPost.findMany({
+                where: { published: true, featured: true },
+                orderBy: { publishedAt: 'desc' },
+                take: 4
+            }),
+            // Skills
+            prisma.skill.findMany({
+                orderBy: { proficiency: 'desc' },
+                take: 8
+            }),
+            // Settings
+            prisma.siteSettings.findUnique({
+                where: { id: 'default' }
+            })
+        ])
 
-async function getFeaturedBlogPosts() {
-    try {
-        const posts = await prisma.blogPost.findMany({
-            where: { published: true, featured: true },
-            orderBy: { publishedAt: 'desc' },
-            take: 4
-        })
-        return posts as unknown as BlogPost[]
+        return {
+            projects: projects as unknown as Project[],
+            posts: posts as unknown as BlogPost[],
+            skills: skills as unknown as Skill[],
+            settings
+        }
     } catch (error) {
-        console.error('Failed to fetch featured blog posts:', error)
-        return []
-    }
-}
-
-async function getSkills() {
-    try {
-        const skills = await prisma.skill.findMany({
-            orderBy: { proficiency: 'desc' },
-            take: 8
-        })
-        return skills as unknown as Skill[]
-    } catch (error) {
-        console.error('Failed to fetch skills:', error)
-        return []
-    }
-}
-
-async function getSettings() {
-    try {
-        const settings = await prisma.siteSettings.findUnique({
-            where: { id: 'default' }
-        })
-        return settings
-    } catch (error) {
-        console.error('Failed to fetch settings:', error)
-        return null
+        console.error('Failed to fetch home page data:', error)
+        return {
+            projects: [],
+            posts: [],
+            skills: [],
+            settings: null
+        }
     }
 }
 
@@ -287,10 +334,7 @@ function JsonLd({ settings, projects }: { settings: any, projects: Project[] }) 
 
 // Main Page Component
 export default async function HomePage() {
-    const featuredProjects = await getFeaturedProjects()
-    const featuredBlogPosts = await getFeaturedBlogPosts()
-    const skills = await getSkills()
-    const settings = await getSettings()
+    const { projects: featuredProjects, posts: featuredBlogPosts, skills, settings } = await getHomePageData()
 
     return (
         <>

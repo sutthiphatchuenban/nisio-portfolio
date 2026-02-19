@@ -14,12 +14,11 @@ import { getSiteSettings } from "@/lib/settings"
 // SEO Metadata for About Page
 export async function generateMetadata(): Promise<Metadata> {
     const settings = await getSiteSettings()
-    const name = settings?.name || siteConfig.author.name
     const title = settings?.title || "Full Stack Developer"
     
     return {
-        title: "About",
-        description: `Learn more about ${name}, ${title}. Discover my skills, experience, and passion for web development.`,
+        title: `About Me`,
+        description: `Learn more about me, a passionate ${title} with expertise in modern web technologies.`,
         keywords: [
             "about",
             "about me",
@@ -38,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
         },
         openGraph: {
             title: `About | ${siteConfig.name}`,
-            description: `Learn more about ${name}, ${title}.`,
+            description: `Learn more about ${settings?.name || "me"}, ${settings?.title || "Full Stack Developer"}.`,
             url: getAbsoluteUrl("/about"),
             type: "profile",
             images: [
@@ -46,14 +45,14 @@ export async function generateMetadata(): Promise<Metadata> {
                     url: settings?.avatar || "/hero_bg.jpg",
                     width: 1200,
                     height: 630,
-                    alt: `${name} - ${title}`,
+                    alt: `${settings?.name || "Portfolio"} - ${settings?.title || "Developer"}`,
                 },
             ],
         },
         twitter: {
             card: "summary_large_image",
             title: `About | ${siteConfig.name}`,
-            description: `Learn more about ${name}, ${title}.`,
+            description: `Learn more about ${settings?.name || "me"}, ${settings?.title || "Full Stack Developer"}.`,
             images: [settings?.avatar || "/hero_bg.jpg"],
         },
     }
@@ -91,10 +90,14 @@ async function getSkills(): Promise<Skill[]> {
 
 // JSON-LD Structured Data Component
 function JsonLd({ settings, skills }: { settings: any, skills: Skill[] }) {
+    const thaiName = "สุทธิภัทร ชื่นบาน"
+    const englishName = "Sutthiphat Chuenban"
+    
     const personSchema = {
         "@context": "https://schema.org",
         "@type": "Person",
-        "name": settings.name,
+        "name": `${thaiName} (${englishName})`,
+        "alternateName": [thaiName, englishName],
         "jobTitle": settings.title,
         "description": settings.bio,
         "url": getAbsoluteUrl("/about"),
@@ -112,19 +115,34 @@ function JsonLd({ settings, skills }: { settings: any, skills: Skill[] }) {
         "address": settings.location ? {
             "@type": "PostalAddress",
             "addressLocality": settings.location,
+            "addressCountry": "TH"
         } : undefined,
+        "alumniOf": {
+            "@type": "Organization",
+            "name": "University"
+        },
     }
 
     const profilePageSchema = {
         "@context": "https://schema.org",
         "@type": "ProfilePage",
-        "name": `About ${settings.name}`,
+        "name": `${thaiName} - ${englishName} | ${settings.title}`,
         "description": settings.bio,
         "url": getAbsoluteUrl("/about"),
         "mainEntity": {
             "@type": "Person",
-            "name": settings.name,
+            "name": `${thaiName} (${englishName})`,
+            "alternateName": [thaiName, englishName],
         },
+    }
+
+    const webPageSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": `${thaiName} - ${englishName}`,
+        "description": `${settings.title} - ${thaiName} (${englishName})`,
+        "url": getAbsoluteUrl("/about"),
+        "inLanguage": ["th", "en"],
     }
 
     return (
@@ -136,6 +154,10 @@ function JsonLd({ settings, skills }: { settings: any, skills: Skill[] }) {
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePageSchema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
             />
         </>
     )
