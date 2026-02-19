@@ -9,10 +9,14 @@ export const siteConfig = {
     description: "ผลงานและประสบการณ์ของ สุทธิภัทร ชื่นบาน พัฒนาเว็บไซต์และแอพพลิเคชั่น | Full Stack Developer Portfolio showcasing projects and skills in web development.",
 
     // Site URL - your production domain
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://nisio-portfolio.vercel.app",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "",
 
     // SEO Keywords
     keywords: [
+        // Brand keywords
+        "nisio",
+        "NISIO",
+        "NISIO PORTFOLIO",
         // English keywords
         "portfolio",
         "developer",
