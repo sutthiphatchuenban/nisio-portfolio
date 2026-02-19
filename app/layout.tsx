@@ -102,9 +102,13 @@ export async function generateMetadata(): Promise<Metadata> {
             canonical: siteUrl,
         },
         icons: {
-            icon: "/favicon.ico",
-            shortcut: "/favicon-16x16.png",
-            apple: "/apple-touch-icon.png",
+            icon: [
+                { url: "/favicon.svg", type: "image/svg+xml" },
+            ],
+            shortcut: "/favicon.svg",
+            apple: [
+                { url: "/apple-touch-icon.svg", type: "image/svg+xml", sizes: "180x180" },
+            ],
         },
         manifest: "/site.webmanifest",
     };
