@@ -15,7 +15,7 @@ import { siteConfig, getAbsoluteUrl } from "@/lib/config"
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params
     const decodedSlug = decodeURIComponent(slug)
-    
+
     const post = await prisma.blogPost.findUnique({
         where: { slug: decodedSlug }
     })
@@ -26,8 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         }
     }
 
-    const imageUrl = post.images && post.images.length > 0 
-        ? post.images[0] 
+    const imageUrl = post.images && post.images.length > 0
+        ? post.images[0]
         : post.coverImage || `${siteConfig.url}/og-image.png`
 
     return {
@@ -126,7 +126,7 @@ function estimateReadTime(content: string): number {
 
 // JSON-LD Structured Data for Blog Post
 function BlogPostJsonLd({ post }: { post: BlogPost }) {
-    const imageUrl = post.images && post.images.length > 0 
+    const imageUrl = post.images && post.images.length > 0
         ? post.images[0]
         : post.coverImage || `${siteConfig.url}/hero_bg.jpg`
 
@@ -180,7 +180,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
     return (
         <>
             <BlogPostJsonLd post={post} />
-            <div className="container py-10 max-w-4xl">
+            <div className="container py-10 max-w-4xl overflow-hidden">
                 <Link href="/blog" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Blog
@@ -194,7 +194,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                                 <Badge key={tag} variant="secondary">{tag}</Badge>
                             ))}
                         </div>
-                        <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">{post.title}</h1>
+                        <h1 className="text-4xl font-bold tracking-tight lg:text-5xl break-words">{post.title}</h1>
                         <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
                             <span className="flex items-center gap-1">
                                 <CalendarDays className="h-4 w-4" />
@@ -222,7 +222,9 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                     />
 
                     {/* Content */}
-                    <MarkdownRenderer content={post.content} className="max-w-none" />
+                    <div className="min-w-0">
+                        <MarkdownRenderer content={post.content} className="max-w-none" />
+                    </div>
 
                     {/* Share / Back */}
                     <div className="flex items-center justify-between pt-8 border-t">

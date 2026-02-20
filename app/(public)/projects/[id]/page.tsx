@@ -13,7 +13,7 @@ import { siteConfig, getAbsoluteUrl } from "@/lib/config"
 // Generate dynamic metadata for each project
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params
-    
+
     const project = await prisma.project.findUnique({
         where: { id, status: 'published' },
         include: { category: true }
@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         }
     }
 
-    const imageUrl = project.images.length > 0 
-        ? project.images[0] 
+    const imageUrl = project.images.length > 0
+        ? project.images[0]
         : project.imageUrl || `${siteConfig.url}/og-image.png`
 
     return {
@@ -90,7 +90,7 @@ async function getProject(id: string) {
 
 // JSON-LD Structured Data for Project
 function ProjectJsonLd({ project }: { project: Project }) {
-    const imageUrl = project.images.length > 0 
+    const imageUrl = project.images.length > 0
         ? project.images[0]
         : project.imageUrl || `${siteConfig.url}/hero_bg.jpg`
 
@@ -162,7 +162,7 @@ export default async function ProjectDetailPage(props: { params: Promise<{ id: s
     return (
         <>
             <ProjectJsonLd project={project} />
-            <div className="container py-10 max-w-4xl">
+            <div className="container py-10 max-w-4xl overflow-hidden">
                 <Link href="/projects" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6 transition-colors">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to projects
@@ -170,7 +170,7 @@ export default async function ProjectDetailPage(props: { params: Promise<{ id: s
 
                 <div className="space-y-6">
                     <div className="space-y-2">
-                        <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">{project.title}</h1>
+                        <h1 className="text-4xl font-bold tracking-tight lg:text-5xl break-words">{project.title}</h1>
                         <div className="flex flex-wrap gap-2 items-center text-muted-foreground">
                             {project.category && <Badge>{project.category.name}</Badge>}
                             <span>•</span>
@@ -187,8 +187,8 @@ export default async function ProjectDetailPage(props: { params: Promise<{ id: s
                     />
 
                     <div className="grid gap-10 md:grid-cols-[2fr_1fr]">
-                        <div className="space-y-6">
-                            <div className="max-w-none">
+                        <div className="space-y-6 min-w-0">
+                            <div className="max-w-none min-w-0">
                                 <h3 className="text-xl font-semibold mb-2">About the Project</h3>
                                 <MarkdownRenderer content={project.description} className="max-w-none" />
                             </div>
