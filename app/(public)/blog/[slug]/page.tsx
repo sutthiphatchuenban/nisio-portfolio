@@ -1,11 +1,11 @@
 import prisma from "@/lib/prisma"
 import { notFound } from "next/navigation"
+import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, CalendarDays, Clock, Eye } from "lucide-react"
 import { ImageCarousel } from "@/components/shared/ImageCarousel"
-import { ClickableImage } from "@/components/ui/clickable-image"
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer"
 import type { BlogPost } from "@/types"
 import type { Metadata } from "next"
@@ -247,10 +247,13 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
                                     <div className="group rounded-lg border bg-card overflow-hidden hover:shadow-lg transition-shadow">
                                         {(relatedPost.images && relatedPost.images.length > 0 ? relatedPost.images[0] : relatedPost.coverImage) && (
                                             <div className="relative aspect-video overflow-hidden">
-                                                <ClickableImage
+                                                <Image
                                                     src={relatedPost.images && relatedPost.images.length > 0 ? relatedPost.images[0] : relatedPost.coverImage!}
                                                     alt={relatedPost.title}
+                                                    fill
                                                     sizes="33vw"
+                                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                                    unoptimized={true}
                                                 />
                                             </div>
                                         )}
