@@ -72,12 +72,14 @@ export async function generateMetadata(): Promise<Metadata> {
     const siteName = settings.siteName || siteConfig.name
     const description = settings.siteDescription || siteConfig.description
     const ogImage = (settings as any)?.heroImage || siteConfig.ogImage || "/og-image.png"
+    const thaiName = "สุทธิภัทร ชื่นบาน"
+    const englishName = "Sutthiphat Chuenban"
 
     return {
         title: {
-            absolute: siteName,
+            absolute: `${siteName} - ${thaiName} (${englishName}) | Full Stack Developer Portfolio`,
         },
-        description: description,
+        description: `${description} | ${thaiName} (${englishName}) - Full Stack Developer`,
         keywords: [
             ...siteConfig.keywords,
             "portfolio website",
@@ -85,13 +87,15 @@ export async function generateMetadata(): Promise<Metadata> {
             "web developer portfolio",
             "software engineer portfolio",
             "creative developer",
+            thaiName,
+            englishName,
         ],
         alternates: {
             canonical: getAbsoluteUrl("/"),
         },
         openGraph: {
-            title: siteName,
-            description: description,
+            title: `${siteName} - ${thaiName} (${englishName})`,
+            description: `${description} | ${thaiName} (${englishName})`,
             url: getAbsoluteUrl("/"),
             type: "website",
             images: [
@@ -99,14 +103,14 @@ export async function generateMetadata(): Promise<Metadata> {
                     url: ogImage,
                     width: 1200,
                     height: 630,
-                    alt: siteName,
+                    alt: `${siteName} - ${thaiName}`,
                 },
             ],
         },
         twitter: {
             card: "summary_large_image",
-            title: siteName,
-            description: description,
+            title: `${siteName} - ${thaiName} (${englishName})`,
+            description: `${description} | ${thaiName} (${englishName})`,
             images: [ogImage],
         },
     }
@@ -160,13 +164,13 @@ async function getHomePageData() {
 }
 
 // Section Header Component
-function SectionHeader({ 
-    icon: Icon, 
-    title, 
-    subtitle, 
+function SectionHeader({
+    icon: Icon,
+    title,
+    subtitle,
     href,
-    delay = 0 
-}: { 
+    delay = 0
+}: {
     icon: typeof Sparkles
     title: string
     subtitle: string
@@ -174,7 +178,7 @@ function SectionHeader({
     delay?: number
 }) {
     return (
-        <div 
+        <div
             className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12 animate-fade-in-up"
             style={{ animationDelay: `${delay}s` }}
         >
@@ -192,8 +196,8 @@ function SectionHeader({
                 </p>
             </div>
             <Link href={href}>
-                <Button 
-                    variant="ghost" 
+                <Button
+                    variant="ghost"
                     className="group text-primary hover:text-primary hover:bg-primary/10"
                 >
                     View All
@@ -211,32 +215,32 @@ function CTASection() {
             {/* Background Effects */}
             <div className="absolute inset-0 gradient-mesh opacity-30" />
             <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
-            
+
             {/* Floating Elements */}
             <div className="absolute top-10 left-10 w-20 h-20 rounded-full bg-primary/10 blur-2xl animate-pulse" />
             <div className="absolute bottom-10 right-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-            
+
             <div className="container relative z-10">
                 <div className="max-w-3xl mx-auto text-center space-y-8">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary animate-fade-in-up">
                         <Mail className="w-4 h-4" />
                         Let's Connect
                     </div>
-                    
+
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                         Ready to Build Something
                         <span className="hero-gradient block mt-2">Amazing Together?</span>
                     </h2>
-                    
+
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                        Have a project in mind? I'd love to hear about it. 
+                        Have a project in mind? I'd love to hear about it.
                         Let's discuss how we can turn your ideas into reality.
                     </p>
-                    
+
                     <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                         <Link href="/contact">
-                            <Button 
-                                size="lg" 
+                            <Button
+                                size="lg"
                                 className="group relative overflow-hidden rounded-full px-8 py-6 text-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/25"
                             >
                                 <span className="relative z-10 flex items-center gap-2">
@@ -247,9 +251,9 @@ function CTASection() {
                             </Button>
                         </Link>
                         <Link href="/projects">
-                            <Button 
-                                variant="outline" 
-                                size="lg" 
+                            <Button
+                                variant="outline"
+                                size="lg"
                                 className="rounded-full px-8 py-6 text-lg font-semibold transition-all duration-300 hover:scale-105 border-2"
                             >
                                 View My Work
@@ -347,7 +351,7 @@ export default async function HomePage() {
                 {featuredBlogPosts.length > 0 && (
                     <section id="content" className="py-24 relative">
                         <div className="container">
-                            <SectionHeader 
+                            <SectionHeader
                                 icon={PenTool}
                                 title="Latest Articles"
                                 subtitle="Thoughts, tutorials, and insights from my journey as a developer"
@@ -357,9 +361,9 @@ export default async function HomePage() {
 
                             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {featuredBlogPosts.map((post, index) => (
-                                    <AnimatedBlogCard 
-                                        key={post.id} 
-                                        post={post} 
+                                    <AnimatedBlogCard
+                                        key={post.id}
+                                        post={post}
                                         priority={index < 3}
                                         index={index}
                                         featured={index === 0}
@@ -374,7 +378,7 @@ export default async function HomePage() {
                 <section className="py-24 relative bg-muted/30">
                     {/* Background Pattern */}
                     <div className="absolute inset-0 opacity-[0.02]">
-                        <div 
+                        <div
                             className="w-full h-full"
                             style={{
                                 backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
@@ -384,7 +388,7 @@ export default async function HomePage() {
                     </div>
 
                     <div className="container relative z-10">
-                        <SectionHeader 
+                        <SectionHeader
                             icon={Code2}
                             title="Featured Projects"
                             subtitle="A selection of my best work, showcasing creativity and technical expertise"
@@ -401,9 +405,9 @@ export default async function HomePage() {
                         ) : (
                             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                 {featuredProjects.map((project, index) => (
-                                    <AnimatedProjectCard 
-                                        key={project.id} 
-                                        project={project} 
+                                    <AnimatedProjectCard
+                                        key={project.id}
+                                        project={project}
                                         priority={index < 3}
                                         index={index}
                                     />
@@ -416,7 +420,7 @@ export default async function HomePage() {
                 {/* Skills Section */}
                 <section className="py-24 relative">
                     <div className="container">
-                        <SectionHeader 
+                        <SectionHeader
                             icon={Wrench}
                             title="Skills & Technologies"
                             subtitle="Tools and technologies I use to bring ideas to life"
@@ -433,8 +437,8 @@ export default async function HomePage() {
                         ) : (
                             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 {skills.map((skill, index) => (
-                                    <AnimatedSkillCard 
-                                        key={skill.id} 
+                                    <AnimatedSkillCard
+                                        key={skill.id}
                                         skill={skill}
                                         index={index}
                                     />

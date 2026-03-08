@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const siteName = settings.siteName || siteConfig.name;
     const description = settings.siteDescription || siteConfig.description;
     const ogImage = (settings as any)?.heroImage || siteConfig.ogImage || "/og-image.png";
-    
+
     // Author names for SEO
     const thaiName = "สุทธิภัทร ชื่นบาน";
     const englishName = "Sutthiphat Chuenban";
@@ -43,8 +43,8 @@ export async function generateMetadata(): Promise<Metadata> {
             google: "9Jx-xpjz5bJAU2otpr_Qw9PkO6b5glead7P7V4Uokm8",
         },
         title: {
-            default: `${siteName} - ${thaiName} Portfolio`,
-            template: `%s | ${siteName}`,
+            default: `${siteName} - ${thaiName} (${englishName}) Portfolio`,
+            template: `%s | ${thaiName} - ${siteName}`,
         },
         description: `${description} | Portfolio by ${thaiName} (${englishName}) - ${settings?.title || "Full Stack Developer"}`,
         keywords: [
@@ -78,6 +78,7 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             type: "website",
             locale: "th_TH",
+            alternateLocale: ["en_US"],
             url: siteUrl,
             siteName: siteName,
             title: siteName,
@@ -100,6 +101,10 @@ export async function generateMetadata(): Promise<Metadata> {
         },
         alternates: {
             canonical: siteUrl,
+            languages: {
+                'th': siteUrl,
+                'en': siteUrl,
+            },
         },
         icons: {
             icon: [
@@ -123,7 +128,10 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="th" suppressHydrationWarning>
+            <head>
+                <meta httpEquiv="content-language" content="th, en" />
+            </head>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
             >

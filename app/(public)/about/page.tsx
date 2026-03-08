@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma"
-import Image from "next/image"
+import { ClickableAvatar } from "@/components/shared/ClickableAvatar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -15,13 +15,22 @@ import { getSiteSettings } from "@/lib/settings"
 export async function generateMetadata(): Promise<Metadata> {
     const settings = await getSiteSettings()
     const title = settings?.title || "Full Stack Developer"
-    
+    const thaiName = "สุทธิภัทร ชื่นบาน"
+    const englishName = "Sutthiphat Chuenban"
+
     return {
-        title: `About Me`,
-        description: `Learn more about me, a passionate ${title} with expertise in modern web technologies.`,
+        title: `เกี่ยวกับ ${thaiName} (${englishName}) - ${title}`,
+        description: `รู้จัก ${thaiName} (${englishName}) ${title} ผู้เชี่ยวชาญด้านการพัฒนาเว็บไซต์ด้วยเทคโนโลยีสมัยใหม่ | Learn more about ${englishName}, a passionate ${title}.`,
         keywords: [
             "about",
             "about me",
+            "เกี่ยวกับ",
+            thaiName,
+            englishName,
+            "สุทธิภัทร",
+            "ชื่นบาน",
+            "Sutthiphat",
+            "Chuenban",
             "developer bio",
             "web developer profile",
             "software engineer",
@@ -29,15 +38,16 @@ export async function generateMetadata(): Promise<Metadata> {
             "frontend developer",
             "backend developer",
             "programmer",
-            "coder",
+            "นักพัฒนาเว็บ",
+            "โปรแกรมเมอร์",
             ...siteConfig.keywords,
         ],
         alternates: {
             canonical: getAbsoluteUrl("/about"),
         },
         openGraph: {
-            title: `About | ${siteConfig.name}`,
-            description: `Learn more about ${settings?.name || "me"}, ${settings?.title || "Full Stack Developer"}.`,
+            title: `${thaiName} (${englishName}) - ${title} | ${siteConfig.name}`,
+            description: `รู้จัก ${thaiName} (${englishName}) ${title} ผู้เชี่ยวชาญด้านการพัฒนาเว็บไซต์ | Learn more about ${englishName}.`,
             url: getAbsoluteUrl("/about"),
             type: "profile",
             images: [
@@ -45,14 +55,14 @@ export async function generateMetadata(): Promise<Metadata> {
                     url: settings?.avatar || "/hero_bg.jpg",
                     width: 1200,
                     height: 630,
-                    alt: `${settings?.name || "Portfolio"} - ${settings?.title || "Developer"}`,
+                    alt: `${thaiName} (${englishName}) - ${title}`,
                 },
             ],
         },
         twitter: {
             card: "summary_large_image",
-            title: `About | ${siteConfig.name}`,
-            description: `Learn more about ${settings?.name || "me"}, ${settings?.title || "Full Stack Developer"}.`,
+            title: `${thaiName} (${englishName}) - ${title} | ${siteConfig.name}`,
+            description: `รู้จัก ${thaiName} (${englishName}) ${title} ผู้เชี่ยวชาญด้านการพัฒนาเว็บไซต์`,
             images: [settings?.avatar || "/hero_bg.jpg"],
         },
     }
@@ -92,7 +102,7 @@ async function getSkills(): Promise<Skill[]> {
 function JsonLd({ settings, skills }: { settings: any, skills: Skill[] }) {
     const thaiName = "สุทธิภัทร ชื่นบาน"
     const englishName = "Sutthiphat Chuenban"
-    
+
     const personSchema = {
         "@context": "https://schema.org",
         "@type": "Person",
@@ -178,23 +188,11 @@ export default async function AboutPage() {
                             <CardContent className="pt-4 sm:pt-6">
                                 <div className="flex flex-col items-center text-center">
                                     {/* Avatar */}
-                                    <div className="relative w-24 h-24 sm:w-32 sm:h-32 mb-3 sm:mb-4 rounded-full overflow-hidden bg-muted border-4 border-background shadow-lg">
-                                        {settings.avatar ? (
-                                            <Image
-                                                src={settings.avatar}
-                                                alt={settings.name}
-                                                fill
-                                                sizes="(max-width: 640px) 96px, 128px"
-                                                className="object-cover"
-                                                priority
-                                                unoptimized={true}
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-3xl sm:text-4xl font-bold text-muted-foreground">
-                                                {settings.name.slice(0, 2).toUpperCase()}
-                                            </div>
-                                        )}
-                                    </div>
+                                    <ClickableAvatar
+                                        src={settings.avatar || ""}
+                                        alt={settings.name}
+                                        fallbackText={settings.name.slice(0, 2).toUpperCase()}
+                                    />
 
                                     <h1 className="text-xl sm:text-2xl font-bold">{settings.name}</h1>
                                     <p className="text-muted-foreground text-sm sm:text-base">{settings.title}</p>

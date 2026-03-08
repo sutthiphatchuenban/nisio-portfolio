@@ -67,12 +67,18 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
             return <>{children}</>;
           },
           // Code blocks with syntax highlighting
-          code({ node, inline, className, children, ...props }: any) {
+          code({ node, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || '');
             const codeString = String(children).replace(/\n$/, '');
 
+            // Detect block-level code by checking if parent is a <pre> element
+            const isBlock = node?.parent?.tagName === 'pre' ||
+              node?.position?.start?.line !== node?.position?.end?.line ||
+              Boolean(match) ||
+              codeString.includes('\n');
+
             // Block-level code (```code```)
-            if (!inline) {
+            if (isBlock) {
               return (
                 <figure className="my-4 rounded-lg overflow-hidden">
                   {match && (
@@ -176,15 +182,25 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
             );
           },
           // Paragraphs - support align attribute
+          // Use div instead of p when children contain block-level elements to avoid invalid HTML nesting
           p({ children, node }: any) {
             const align = node?.properties?.align;
+            // Check if any child is a block-level element (figure, div, pre, etc.)
+            const hasBlockChild = node?.children?.some((child: any) => {
+              if (child.type === 'element') {
+                const blockTags = ['figure', 'div', 'pre', 'table', 'blockquote', 'ul', 'ol', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'section', 'article', 'aside', 'nav', 'header', 'footer', 'main'];
+                return blockTags.includes(child.tagName);
+              }
+              return false;
+            });
+            const Tag = hasBlockChild ? 'div' : 'p';
             return (
-              <p
+              <Tag
                 className="mb-4 leading-7 text-foreground"
                 style={align ? { textAlign: align } : undefined}
               >
                 {children}
-              </p>
+              </Tag>
             );
           },
           // Div - support align attribute

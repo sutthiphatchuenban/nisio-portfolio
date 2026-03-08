@@ -3,10 +3,10 @@
 
 export const siteConfig = {
     // Default site name - can be changed in admin settings
-    name: "NISIO PORTFOLIO",
+    name: "NISIO PORTFOLIO - สุทธิภัทร ชื่นบาน | Sutthiphat Chuenban",
 
     // Default site description - can be changed in admin settings
-    description: "ผลงานและประสบการณ์ของ สุทธิภัทร ชื่นบาน พัฒนาเว็บไซต์และแอพพลิเคชั่น | Full Stack Developer Portfolio showcasing projects and skills in web development.",
+    description: "Portfolio ของ สุทธิภัทร ชื่นบาน (Sutthiphat Chuenban) - Full Stack Developer ผู้เชี่ยวชาญด้านการพัฒนาเว็บไซต์และแอพพลิเคชั่น | Web Developer Portfolio showcasing projects and skills.",
 
     // Site URL - your production domain
     url: process.env.NEXT_PUBLIC_SITE_URL || "",
@@ -17,6 +17,14 @@ export const siteConfig = {
         "nisio",
         "NISIO",
         "NISIO PORTFOLIO",
+        // Personal name - Full
+        "Sutthiphat Chuenban",
+        "สุทธิภัทร ชื่นบาน",
+        // Personal name - Partial (for partial search matching)
+        "Sutthiphat",
+        "Chuenban",
+        "สุทธิภัทร",
+        "ชื่นบาน",
         // English keywords
         "portfolio",
         "developer",
@@ -32,9 +40,7 @@ export const siteConfig = {
         "react",
         "nextjs",
         "web development",
-        "Sutthiphat Chuenban",
         // Thai keywords
-        "สุทธิภัทร ชื่นบาน",
         "นักพัฒนาเว็บ",
         "โปรแกรมเมอร์",
         "พอร์ตโฟลิโอ",
@@ -46,6 +52,8 @@ export const siteConfig = {
         "จาวาสคริปต์",
         "รีแอค",
         "เน็กซ์เจเอส",
+        "นักพัฒนาไทย",
+        "developer ไทย",
     ],
 
     // Author info
@@ -56,9 +64,9 @@ export const siteConfig = {
 
     // Social links
     social: {
-        github: "https://github.com/yourhandle",
-        linkedin: "https://linkedin.com/in/yourhandle",
-        twitter: "https://twitter.com/yourhandle",
+        github: "",
+        linkedin: "",
+        twitter: "",
     },
 
     // Open Graph defaults
