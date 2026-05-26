@@ -54,7 +54,8 @@ Rules:
 8. CRITICAL: The page MUST be COMPLETE. Always close every HTML tag. Always include </body></html> at the end. Keep the page to 3-5 sections maximum to ensure it fits completely. Never leave the code unfinished.
 9. Prefer concise, elegant implementations. Avoid extremely long repeated markup. Quality over quantity.
 10. LINE LIMIT: The total HTML output MUST NOT exceed 250 lines in length. Keep the markup, inline CSS, and JavaScript clean and compact to fit within this 250-line limit.
-11. IMAGES: Always use high-quality, specific, and relevant Unsplash image URLs (e.g. starting with \`https://images.unsplash.com/photo-...\` with parameters like \`?auto=format&fit=crop&w=800&q=80\`) for any image or avatar tags. Choose photos that precisely match the theme of the requested website. Never use broken paths, local files, or blank colored blocks.`;
+11. IMAGES: Always use high-quality, specific, and relevant Unsplash image URLs (e.g. starting with \`https://images.unsplash.com/photo-...\` with parameters like \`?auto=format&fit=crop&w=800&q=80\`) for any image or avatar tags. Choose photos that precisely match the theme of the requested website. Never use broken paths, local files, or blank colored blocks.
+12. LANDING PAGE FORMAT: Structure the entire document strictly as a single-page landing page containing: a navigation bar, a hero section (headline, CTAs, hero image), a service/feature grid, a call-to-action (CTA) section (or contact form), and a footer. Ensure it flows logically as one complete page.`;
 
         const userPrompt = `Template Style Chosen: ${template || 'Modern SaaS'}
 User Prompt / Website Description: ${prompt}
