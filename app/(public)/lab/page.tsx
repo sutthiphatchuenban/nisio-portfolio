@@ -339,7 +339,7 @@ export default function LabPage() {
                                     <div className="space-y-1">
                                         <h3 className="text-base font-extrabold tracking-tight">Assembling Website...</h3>
                                         <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
-                                            The AI is compiling HTML and styling with Tailwind. This may take up to 30 seconds...
+                                            The AI is compiling HTML and styling with Tailwind. Please wait while the model completes the generation...
                                         </p>
                                     </div>
                                 </div>
