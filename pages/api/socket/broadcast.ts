@@ -18,6 +18,6 @@ export default async function broadcastHandler(req: NextApiRequest, res: any) {
         res.socket.server.io.emit(event, data)
         return res.status(200).json({ message: "Event broadcasted" })
     } else {
-        return res.status(500).json({ message: "Socket server not running" })
+        return res.status(202).json({ message: "Socket server not running" })
     }
 }
