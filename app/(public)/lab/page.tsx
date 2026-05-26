@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { 
     Sparkles, Code2, Laptop, Smartphone, Play, 
     Terminal, Copy, Check, AlertCircle, Eye, 
-    Layers, Zap, RefreshCw, Lock, ExternalLink
+    Layers, Zap, RefreshCw, Lock, ExternalLink, Brain
 } from "lucide-react"
 
 const templates = [
@@ -40,6 +40,19 @@ const templates = [
     }
 ]
 
+const models = [
+    {
+        id: "qwen/qwen3.5-122b-a10b",
+        name: "Qwen 3.5 122B (Default)",
+        desc: "Highly capable multi-lingual model by Alibaba."
+    },
+    {
+        id: "openai/gpt-oss-120b",
+        name: "GPT-OSS 120B",
+        desc: "Open source alignment model optimized for coding."
+    }
+]
+
 export default function LabPage() {
     const [prompt, setPrompt] = useState("")
     const [selectedTemplate, setSelectedTemplate] = useState("Modern SaaS")
@@ -50,6 +63,7 @@ export default function LabPage() {
     const [activeTab, setActiveTab] = useState<"preview" | "code">("preview")
     const [remaining, setRemaining] = useState<number | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [selectedModel, setSelectedModel] = useState("qwen/qwen3.5-122b-a10b")
 
     // Load remaining attempts limit status
     useEffect(() => {
@@ -76,7 +90,7 @@ export default function LabPage() {
             const res = await fetch("/api/lab/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt, template: selectedTemplate })
+                body: JSON.stringify({ prompt, template: selectedTemplate, model: selectedModel })
             })
 
             const data = await res.json()
@@ -136,6 +150,34 @@ export default function LabPage() {
                     
                     {/* ── Left Sidebar ── */}
                     <div className="space-y-5">
+                        {/* Model Selector */}
+                        <div className="rounded-xl border bg-card p-4 space-y-3">
+                            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                <Brain className="w-3.5 h-3.5" /> Choose AI Model
+                            </h2>
+                            <div className="space-y-2">
+                                {models.map((m) => {
+                                    const isSelected = selectedModel === m.id
+                                    return (
+                                        <button
+                                            key={m.id}
+                                            onClick={() => setSelectedModel(m.id)}
+                                            className={`w-full flex flex-col text-left p-3 rounded-lg border transition-all duration-200 ${
+                                                isSelected 
+                                                    ? "border-primary bg-primary/5 ring-1 ring-primary/30" 
+                                                    : "border-border/60 hover:border-primary/40 bg-background"
+                                            }`}
+                                        >
+                                            <span className="text-xs font-bold leading-tight">{m.name}</span>
+                                            <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
+                                                {m.desc}
+                                            </p>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
                         {/* Template Picker */}
                         <div className="rounded-xl border bg-card p-4 space-y-3">
                             <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
