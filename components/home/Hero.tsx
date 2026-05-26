@@ -17,7 +17,7 @@ export default function Hero() {
         : "I design and build fast, polished web experiences where interface, systems, and motion work together with intent."
 
     return (
-        <section className="relative isolate min-h-[calc(100svh-5.5rem)] overflow-hidden bg-background">
+        <section className="relative isolate min-h-[75svh] overflow-hidden bg-background">
             <div className="absolute inset-0 -z-20">
                 <Image
                     src={heroImage}
@@ -43,10 +43,10 @@ export default function Hero() {
                 />
             </div>
 
-            <div className="container grid min-h-[calc(100svh-5.5rem)] items-center gap-10 py-8 md:grid-cols-[1.05fr_0.95fr] md:py-10 lg:gap-14">
-                <div className="max-w-3xl space-y-8">
+            <div className="container grid min-h-[75svh] items-center gap-10 py-4 md:grid-cols-[1.05fr_0.95fr] md:py-6 lg:gap-14">
+                <div className="max-w-3xl space-y-6">
 
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                         <p className="text-sm font-medium text-muted-foreground md:text-base">
                             {name} - {title}
                         </p>
@@ -84,7 +84,7 @@ export default function Hero() {
                     </div>
                 </div>
 
-                <div className="relative min-h-[430px] md:min-h-[620px]">
+                <div className="relative min-h-[350px] md:min-h-[500px]">
                     <div className="absolute left-4 top-4 h-[78%] w-[74%] border border-primary/45" />
                     <div className="absolute bottom-8 right-0 h-[78%] w-[78%] overflow-hidden border border-border bg-muted shadow-2xl">
                         <Image
