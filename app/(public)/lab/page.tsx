@@ -50,6 +50,16 @@ const models = [
         id: "openai/gpt-oss-120b",
         name: "GPT-OSS 120B",
         desc: "Open source alignment model optimized for coding."
+    },
+    {
+        id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+        name: "Nemotron 3 Nano Omni",
+        desc: "Advanced reasoning model by NVIDIA."
+    },
+    {
+        id: "minimaxai/minimax-m2.7",
+        name: "MiniMax M2.7",
+        desc: "High-performance model by MiniMax."
     }
 ]
 
