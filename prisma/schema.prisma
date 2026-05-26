@@ -136,3 +136,12 @@ model BlogPost {
   @@map("blog_posts")
 }
 
+model AiGenerationLimit {
+  id        String   @id @default(uuid())
+  ipAddress String   @unique @map("ip_address") @db.VarChar(255)
+  count     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("ai_generation_limits")
+}
