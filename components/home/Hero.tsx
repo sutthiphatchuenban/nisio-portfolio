@@ -82,6 +82,13 @@ export default function Hero() {
                             <Link href="/contact">Start a Conversation</Link>
                         </Button>
                     </div>
+
+                    <div className="mt-8 border-t border-border/60 pt-6 max-w-md">
+                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Current Focus</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                            Clean architecture, vivid UI, and admin tools that feel quick in real use.
+                        </p>
+                    </div>
                 </div>
 
                 <div className="relative min-h-[350px] md:min-h-[500px]">
@@ -112,12 +119,6 @@ export default function Hero() {
                                 </div>
                             ))}
                         </div>
-                    </div>
-                    <div className="absolute bottom-0 left-0 max-w-[16rem] border border-border bg-background p-4 shadow-xl">
-                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Current Focus</p>
-                        <p className="mt-2 text-sm leading-6">
-                            Clean architecture, vivid UI, and admin tools that feel quick in real use.
-                        </p>
                     </div>
                 </div>
             </div>
