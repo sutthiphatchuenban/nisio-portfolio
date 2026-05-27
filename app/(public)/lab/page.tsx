@@ -42,19 +42,28 @@ const templates = [
 
 const models = [
     {
+        id: "gemini-3-flash-preview",
+        name: "Gemini 3 Flash Preview (Default)",
+        desc: "Google's next-gen high-speed agentic multimodal model.",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Google_Gemini_icon_2025.svg/500px-Google_Gemini_icon_2025.svg.png"
+    },
+    {
         id: "qwen/qwen3.5-122b-a10b",
-        name: "Qwen 3.5 122B (Default)",
-        desc: "Highly capable multi-lingual model by Alibaba."
+        name: "Qwen 3.5 122B",
+        desc: "Highly capable multi-lingual model by Alibaba.",
+        logo: "https://vectorseek.com/wp-content/uploads/2025/01/Qwen-Ai-Logo-PNG-Vector.png"
     },
     {
         id: "openai/gpt-oss-120b",
         name: "GPT-OSS 120B",
-        desc: "Open source alignment model optimized for coding."
+        desc: "Open source alignment model optimized for coding.",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/ChatGPT-Logo.svg/1280px-ChatGPT-Logo.svg.png"
     },
     {
         id: "minimaxai/minimax-m2.7",
         name: "MiniMax M2.7",
-        desc: "High-performance model by MiniMax."
+        desc: "High-performance model by MiniMax.",
+        logo: "https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-png/dark/minimax-color.png"
     }
 ]
 
@@ -68,7 +77,7 @@ export default function LabPage() {
     const [activeTab, setActiveTab] = useState<"preview" | "code">("preview")
     const [remaining, setRemaining] = useState<number | null>(null)
     const [error, setError] = useState<string | null>(null)
-    const [selectedModel, setSelectedModel] = useState("qwen/qwen3.5-122b-a10b")
+    const [selectedModel, setSelectedModel] = useState("gemini-3-flash-preview")
 
     // Load remaining attempts limit status
     useEffect(() => {
@@ -167,16 +176,21 @@ export default function LabPage() {
                                         <button
                                             key={m.id}
                                             onClick={() => setSelectedModel(m.id)}
-                                            className={`w-full flex flex-col text-left p-3 rounded-lg border transition-all duration-200 ${
+                                            className={`w-full flex items-start gap-3 text-left p-3 rounded-lg border transition-all duration-200 ${
                                                 isSelected 
                                                     ? "border-primary bg-primary/5 ring-1 ring-primary/30" 
                                                     : "border-border/60 hover:border-primary/40 bg-background"
                                             }`}
                                         >
-                                            <span className="text-xs font-bold leading-tight">{m.name}</span>
-                                            <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
-                                                {m.desc}
-                                            </p>
+                                            <div className="w-8 h-8 rounded-md bg-white dark:bg-zinc-900 flex items-center justify-center p-1 border border-border/40 shrink-0 overflow-hidden">
+                                                <img src={m.logo} alt={m.name} className="object-contain w-full h-full" />
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="text-xs font-bold leading-tight truncate">{m.name}</span>
+                                                <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug line-clamp-2">
+                                                    {m.desc}
+                                                </p>
+                                            </div>
                                         </button>
                                     )
                                 })}

@@ -33,12 +33,17 @@ export async function POST(request: Request) {
             })
         }
 
-        // Call NVIDIA AI API
-        const apiKey = process.env.NVIDIA_API_KEY
+        // Call Selected AI Provider API
+        const isGemini = model?.startsWith("gemini")
+        const apiKey = isGemini ? process.env.GEMINI_API_KEY : process.env.NVIDIA_API_KEY
         if (!apiKey) {
-            console.error('NVIDIA_API_KEY is not set')
-            return NextResponse.json({ error: 'NVIDIA API key not configured on server' }, { status: 500 })
+            console.error(isGemini ? 'GEMINI_API_KEY is not set' : 'NVIDIA_API_KEY is not set')
+            return NextResponse.json({ error: `${isGemini ? 'Gemini' : 'NVIDIA'} API key not configured on server` }, { status: 500 })
         }
+
+        const apiUrl = isGemini 
+            ? "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions" 
+            : "https://integrate.api.nvidia.com/v1/chat/completions"
 
         let templateSpecificPrompt = ""
         if (template === "Modern SaaS") {
@@ -92,10 +97,15 @@ Rules:
 6. Use inline SVGs for icons. Do NOT use external icon libraries.
 7. Return ONLY the HTML code. Do NOT wrap the output in markdown code blocks like \`\`\`html ... \`\`\` or include any conversational intro/outro text. Start directly with <!DOCTYPE html>.
 8. CRITICAL: The page MUST be COMPLETE. Always close every HTML tag. Always include </body></html> at the end. Keep the page to 3-5 sections maximum to ensure it fits completely. Never leave the code unfinished.
-9. Prefer concise, elegant implementations. Avoid extremely long repeated markup. Quality over quantity.
-10. LINE LIMIT: The total HTML output MUST NOT exceed 180 lines in length. Write structurally compact HTML: put simple inline elements, SVGs, lists, and button elements on a single line instead of wrapping them across multiple lines. Avoid redundant line breaks.
+9. ${isGemini 
+    ? "Prefer highly detailed, fully fleshed-out, and elegant implementations. Make the page rich in content and visual elements." 
+    : "Prefer concise, elegant implementations. Avoid extremely long repeated markup. Quality over quantity."}
+10. LINE LIMIT: ${isGemini 
+    ? "The total HTML output should be rich and comprehensive, up to 350 lines in length. Do not compress or shorten the code unnecessarily." 
+    : "The total HTML output MUST NOT exceed 180 lines in length. Write structurally compact HTML: put simple inline elements, SVGs, lists, and button elements on a single line instead of wrapping them across multiple lines. Avoid redundant line breaks."}
 11. IMAGES: Always use high-quality, specific, and relevant Unsplash image URLs (e.g. starting with \`https://images.unsplash.com/photo-...\` with parameters like \`?auto=format&fit=crop&w=800&q=80\`) for any image or avatar tags. Choose photos that precisely match the theme of the requested website. Never use broken paths, local files, or blank colored blocks.
 12. LANDING PAGE FORMAT: Structure the entire document strictly as a single-page landing page containing: a navigation bar, a hero section (headline, CTAs, hero image), a service/feature grid, a call-to-action (CTA) section (or contact form), and a footer. Ensure it flows logically as one complete page.
+13. NO REACT/JSX/ES6 TEMPLATE STRINGS: Do NOT write React/JSX components or loops (e.g. '{[...].map()}' or '\${var}') in the HTML body. The HTML body must contain ONLY valid, raw, static HTML. Duplicate card/list items manually if needed instead of using JSX loops or template interpolation in the body.
 
 ${templateSpecificPrompt}`;
 
@@ -104,7 +114,7 @@ User Prompt / Website Description: ${prompt}
 
 Create a gorgeous, fully functioning frontend web page according to this description. Make sure it feels alive with micro-interactions, smooth transitions, and a premium look. IMPORTANT: The page must be COMPLETE — always end with closing </body></html> tags. Keep the page to 3-5 key sections to ensure completeness.`;
 
-        const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+        const response = await fetch(apiUrl, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${apiKey}`,
@@ -199,7 +209,7 @@ Create a gorgeous, fully functioning frontend web page according to this descrip
             
             conversationMessages.push({ role: "user", content: continuePrompt })
 
-            const continueResponse = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+            const continueResponse = await fetch(apiUrl, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${apiKey}`,
@@ -591,9 +601,9 @@ function injectAesthetics(html: string, template: string): string {
 
     const cssBlock = `
     <!-- INJECTED PREMIUM STYLING BY PLAYGROUND SANDBOX -->
-    \${fontLink}
+    ${fontLink}
     <style>
-        \${templateCss}
+        ${templateCss}
         
         .transition-premium {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -608,11 +618,11 @@ function injectAesthetics(html: string, template: string): string {
     `;
 
     if (html.includes("</head>")) {
-        return html.replace("</head>", `\${cssBlock}\\n</head>`);
+        return html.replace("</head>", () => `${cssBlock}\n</head>`);
     } else if (html.includes("<head>")) {
-        return html.replace("<head>", `<head>\\n\${cssBlock}`);
+        return html.replace("<head>", () => `<head>\n${cssBlock}`);
     } else if (html.includes("<body>")) {
-        return html.replace("<body>", `<head>\\n\${cssBlock}\\n</head>\\n<body>`);
+        return html.replace("<body>", () => `<head>\n${cssBlock}\n</head>\n<body>`);
     }
     
     return cssBlock + html;
