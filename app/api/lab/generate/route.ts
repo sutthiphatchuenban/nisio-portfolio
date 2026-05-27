@@ -617,13 +617,36 @@ function injectAesthetics(html: string, template: string): string {
     </style>
     `;
 
-    if (html.includes("</head>")) {
-        return html.replace("</head>", () => `${cssBlock}\n</head>`);
-    } else if (html.includes("<head>")) {
-        return html.replace("<head>", () => `<head>\n${cssBlock}`);
-    } else if (html.includes("<body>")) {
-        return html.replace("<body>", () => `<head>\n${cssBlock}\n</head>\n<body>`);
+    let processedHtml = html;
+    if (processedHtml.includes("</head>")) {
+        processedHtml = processedHtml.replace("</head>", () => `${cssBlock}\n</head>`);
+    } else if (processedHtml.includes("<head>")) {
+        processedHtml = processedHtml.replace("<head>", () => `<head>\n${cssBlock}`);
+    } else if (processedHtml.includes("<body>")) {
+        processedHtml = processedHtml.replace("<body>", () => `<head>\n${cssBlock}\n</head>\n<body>`);
+    } else {
+        processedHtml = cssBlock + processedHtml;
+    }
+
+    const scriptBlock = `
+    <script>
+        // Prevent all link navigation inside the preview
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('a');
+            if (target) {
+                const href = target.getAttribute('href');
+                if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                    e.preventDefault();
+                    console.log('Navigation prevented in sandbox:', href);
+                }
+            }
+        });
+    </script>
+    `;
+
+    if (processedHtml.includes("</body>")) {
+        return processedHtml.replace("</body>", () => `${scriptBlock}\n</body>`);
     }
     
-    return cssBlock + html;
+    return processedHtml + scriptBlock;
 }
