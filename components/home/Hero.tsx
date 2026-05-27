@@ -55,11 +55,11 @@ export default function Hero() {
                         </h1>
                     </div>
 
-                    <div className="grid gap-5 border-l border-primary/50 pl-5 md:max-w-2xl md:grid-cols-[1fr_auto] md:items-end">
+                    <div className="space-y-4 border-l border-primary/50 pl-5 md:max-w-2xl">
                         <p className="text-base leading-8 text-muted-foreground sm:text-lg">
                             {summary}
                         </p>
-                        <div className="flex flex-wrap gap-3 md:flex-col md:items-start">
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 pt-1">
                             <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                                 <MapPin className="h-4 w-4 text-primary" />
                                 {location}
