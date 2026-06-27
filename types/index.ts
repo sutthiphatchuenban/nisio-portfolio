@@ -77,3 +77,28 @@ export interface SiteSettings {
   twitterUrl?: string | null
   updatedAt: string
 }
+
+export interface VideoCategory {
+  id: string
+  name: string
+  slug: string
+  description?: string | null
+  color?: string | null
+}
+
+export interface Video {
+  id: string
+  title: string
+  description?: string | null
+  youtubeUrl: string
+  thumbnailUrl?: string | null
+  categoryId?: string | null
+  tags: string[]
+  published: boolean
+  featured: boolean
+  viewCount: number
+  duration?: string | null
+  createdAt: string
+  updatedAt: string
+  category?: VideoCategory | null
+}

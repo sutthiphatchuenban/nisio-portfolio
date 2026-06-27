@@ -30,6 +30,7 @@ interface SettingsFormValues {
     bio: string
     avatar: string
     heroImage: string
+    heroImageMobile: string
     email: string
     location: string
     resumeUrl: string
@@ -52,6 +53,7 @@ export default function AdminSettingsPage() {
             bio: "",
             avatar: "",
             heroImage: "",
+            heroImageMobile: "",
             email: "",
             location: "",
             resumeUrl: "",
@@ -76,6 +78,7 @@ export default function AdminSettingsPage() {
                 bio: res.data.bio || "",
                 avatar: res.data.avatar || "",
                 heroImage: res.data.heroImage || "",
+                heroImageMobile: res.data.heroImageMobile || "",
                 email: res.data.email || "",
                 location: res.data.location || "",
                 resumeUrl: res.data.resumeUrl || "",
@@ -165,7 +168,21 @@ export default function AdminSettingsPage() {
                                         <FormControl>
                                             <ImageUpload value={field.value} onChange={field.onChange} />
                                         </FormControl>
-                                        <FormDescription>Background image for the hero section on homepage</FormDescription>
+                                        <FormDescription>Background image for the hero section (Desktop)</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="heroImageMobile"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Hero Background Image (Mobile)</FormLabel>
+                                        <FormControl>
+                                            <ImageUpload value={field.value} onChange={field.onChange} />
+                                        </FormControl>
+                                        <FormDescription>Background image for mobile screens (portrait ratio recommended)</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}

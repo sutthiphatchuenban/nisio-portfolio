@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { LayoutDashboard, FolderKanban, Wrench, Mail, LogOut, Settings, Menu, FileText } from "lucide-react"
+import { LayoutDashboard, FolderKanban, Wrench, Mail, LogOut, Settings, Menu, FileText, Video } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useSiteSettings } from "@/components/providers/site-settings-provider"
 import { useRouter } from "next/navigation"
@@ -27,6 +27,11 @@ const sidebarItems = [
         title: "Blog",
         href: "/admin/blog",
         icon: FileText,
+    },
+    {
+        title: "Videos",
+        href: "/admin/videos",
+        icon: Video,
     },
     {
         title: "Skills",

@@ -2,12 +2,12 @@ import dynamic from "next/dynamic"
 import { Suspense } from "react"
 import Hero from "@/components/home/Hero"
 import prisma from "@/lib/prisma"
-import type { Project, Skill, BlogPost } from "@/types"
+import type { Project, Skill, BlogPost, Video } from "@/types"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowRight, Sparkles, Code2, PenTool, Wrench, Mail } from "lucide-react"
+import { ArrowRight, Sparkles, Code2, PenTool, Wrench, Mail, Play } from "lucide-react"
 import type { Metadata } from "next"
 import { siteConfig, getAbsoluteUrl } from "@/lib/config"
 import { getSiteSettings } from "@/lib/settings"
@@ -121,7 +121,7 @@ export const revalidate = 0
 
 async function getHomePageData() {
     try {
-        const [projects, posts, skills, settings] = await Promise.all([
+        const [projects, posts, skills, settings, videos] = await Promise.all([
             // Featured Projects
             prisma.project.findMany({
                 where: { featured: true, status: 'published' },
@@ -143,13 +143,21 @@ async function getHomePageData() {
             // Settings
             prisma.siteSettings.findUnique({
                 where: { id: 'default' }
-            })
+            }),
+            // Featured Videos
+            prisma.video.findMany({
+                where: { published: true, featured: true },
+                orderBy: { createdAt: 'desc' },
+                take: 4,
+                include: { category: true }
+            }),
         ])
 
         return {
             projects: projects as unknown as Project[],
             posts: posts as unknown as BlogPost[],
             skills: skills as unknown as Skill[],
+            videos: videos as unknown as Video[],
             settings
         }
     } catch (error) {
@@ -158,6 +166,7 @@ async function getHomePageData() {
             projects: [],
             posts: [],
             skills: [],
+            videos: [],
             settings: null
         }
     }
@@ -338,14 +347,19 @@ function JsonLd({ settings, projects }: { settings: any, projects: Project[] }) 
 
 // Main Page Component
 export default async function HomePage() {
-    const { projects: featuredProjects, posts: featuredBlogPosts, skills, settings } = await getHomePageData()
+    const { projects: featuredProjects, posts: featuredBlogPosts, skills, settings, videos: featuredVideos } = await getHomePageData()
 
     return (
         <>
             <JsonLd settings={settings} projects={featuredProjects} />
             <div className="min-h-screen">
                 {/* Hero Section */}
-                <Hero />
+                <Hero
+                    heroImage={(settings as any)?.heroImage}
+                    heroImageMobile={(settings as any)?.heroImageMobile}
+                    name={settings?.name}
+                    title={settings?.title}
+                />
 
                 {/* Featured Blog Posts Section */}
                 {featuredBlogPosts.length > 0 && (
@@ -416,6 +430,52 @@ export default async function HomePage() {
                         )}
                     </div>
                 </section>
+
+                {/* Featured Videos Section */}
+                {featuredVideos.length > 0 && (
+                    <section className="py-24 relative bg-muted/30">
+                        <div className="container">
+                            <SectionHeader
+                                icon={Play}
+                                title="Featured Videos"
+                                subtitle="Watch my latest tutorials, project showcases, and tech talks"
+                                href="/videos"
+                                delay={0.1}
+                            />
+
+                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                                {featuredVideos.map((video) => (
+                                    <Link key={video.id} href={`/videos/${video.id}`}>
+                                        <div className="group relative rounded-lg border bg-card overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
+                                            <div className="relative aspect-video overflow-hidden bg-muted">
+                                                <img
+                                                    src={video.thumbnailUrl || "/placeholder-video.jpg"}
+                                                    alt={video.title}
+                                                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="rounded-full bg-white/90 p-3">
+                                                        <Play className="h-5 w-5 text-black fill-black" />
+                                                    </div>
+                                                </div>
+                                                {video.duration && (
+                                                    <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded">
+                                                        {video.duration}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="p-3">
+                                                <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                                                    {video.title}
+                                                </h3>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
 
                 {/* Skills Section */}
                 <section className="py-24 relative">
