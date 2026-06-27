@@ -13,10 +13,22 @@ interface HeroProps {
     title?: string
 }
 
+function optimizeCloudinaryImage(url: string, width: number) {
+    const uploadSegment = "/image/upload/"
+
+    if (!url.includes("res.cloudinary.com") || !url.includes(uploadSegment)) {
+        return url
+    }
+
+    return url.replace(uploadSegment, `${uploadSegment}f_auto,q_auto,c_limit,w_${width}/`)
+}
+
 export default function Hero({ heroImage: heroImageProp, heroImageMobile: heroImageMobileProp, name: nameProp, title: titleProp }: HeroProps) {
     const { settings } = useSiteSettings()
     const heroImage = heroImageProp || settings?.heroImage || "/hero_bg.jpg"
     const heroImageMobile = heroImageMobileProp || (settings as any)?.heroImageMobile || heroImage
+    const desktopHeroImage = optimizeCloudinaryImage(heroImage, 1600)
+    const mobileHeroImage = optimizeCloudinaryImage(heroImageMobile, 900)
     const name = nameProp || settings?.name || "Sutthiphat Chuenban"
     const title = titleProp || settings?.title || "Full Stack Developer"
 
@@ -26,7 +38,7 @@ export default function Hero({ heroImage: heroImageProp, heroImageMobile: heroIm
             <section className="relative hidden md:block h-svh min-h-[600px] w-full overflow-hidden">
                 <div className="absolute inset-0">
                     <Image
-                        src={heroImage}
+                        src={desktopHeroImage}
                         alt={name}
                         fill
                         priority
@@ -68,7 +80,7 @@ export default function Hero({ heroImage: heroImageProp, heroImageMobile: heroIm
             {/* Mobile - image full with text at bottom */}
             <section className="relative block md:hidden h-svh min-h-[600px] w-full overflow-hidden">
                 <Image
-                    src={heroImageMobile}
+                    src={mobileHeroImage}
                     alt={name}
                     fill
                     priority
