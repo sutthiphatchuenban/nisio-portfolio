@@ -203,23 +203,31 @@ export function ThemeEffects() {
 
     // Pre-calculate snowflake data
     const snowflakeData: SnowflakeData[] = useMemo(() => {
-        return [...Array(25)].map((_, i) => ({
-            char: snowflakes[i % snowflakes.length],
-            left: getRandom(i) * 100,
-            delay: getRandom(i + 10) * 10,
-            duration: 8 + getRandom(i + 20) * 6,
-            size: 0.8 + getRandom(i + 30) * 0.8,
-            opacity: 0.6 + getRandom(i + 40) * 0.4,
-        }))
+        return [...Array(25)].map((_, i) => {
+            const duration = 8 + getRandom(i + 20) * 6
+            return {
+                char: snowflakes[i % snowflakes.length],
+                left: getRandom(i) * 100,
+                // Negative delay: snowflakes start mid-animation, scattered across the screen (no pile at top)
+                delay: -(getRandom(i + 10) * duration),
+                duration,
+                size: 0.8 + getRandom(i + 30) * 0.8,
+                opacity: 0.6 + getRandom(i + 40) * 0.4,
+            }
+        })
     }, [])
 
     // Pre-calculate petal data
     const petalData: PetalData[] = useMemo(() => {
-        return [...Array(15)].map((_, i) => ({
-            left: getRandom(i + 50) * 100,
-            delay: getRandom(i + 60) * 8,
-            duration: 6 + getRandom(i + 70) * 4,
-        }))
+        return [...Array(15)].map((_, i) => {
+            const duration = 6 + getRandom(i + 70) * 4
+            return {
+                left: getRandom(i + 50) * 100,
+                // Negative delay: petals start mid-animation instead of piling at the top
+                delay: -(getRandom(i + 60) * duration),
+                duration,
+            }
+        })
     }, [])
 
     if (!mounted) return null

@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useState, Suspense } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,12 +20,14 @@ import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
 
 const formSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(1, "Password is required"),
+    email: z.string().email("กรุณากรอกอีเมลที่ถูกต้อง"),
+    password: z.string().min(1, "กรุณากรอกรหัสผ่าน"),
 })
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const callbackUrl = searchParams?.get("callbackUrl") || "/admin/dashboard"
     const [loading, setLoading] = useState(false)
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -41,20 +43,20 @@ export default function LoginPage() {
         try {
             const result = await signIn("credentials", {
                 redirect: false,
-                email: values.email,
-                password: values.password,
+                email: values.email.trim(),
+                password: values.password.trim(),
             })
 
             if (result?.error) {
-                toast.error("Invalid email or password")
+                toast.error("อีเมลหรือรหัสผ่านไม่ถูกต้อง (Invalid email or password)")
                 return
             }
 
-            toast.success("Logged in successfully")
-            router.push("/admin/dashboard")
+            toast.success("เข้าสู่ระบบสำเร็จ")
+            router.push(callbackUrl)
             router.refresh()
         } catch (error) {
-            toast.error("Something went wrong")
+            toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ")
         } finally {
             setLoading(false)
         }
@@ -62,10 +64,10 @@ export default function LoginPage() {
 
     return (
         <div className="flex h-screen items-center justify-center bg-muted/40 p-4">
-            <Card className="w-full max-w-sm">
+            <Card className="w-full max-w-sm shadow-xl border-border/60">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-2xl">Admin Login</CardTitle>
-                    <CardDescription>Enter your credentials to access the dashboard</CardDescription>
+                    <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+                    <CardDescription>เข้าสู่ระบบเพื่อจัดการระบบและการประชุม</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -77,7 +79,7 @@ export default function LoginPage() {
                                     <FormItem>
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="admin@example.com" {...field} />
+                                            <Input placeholder="admin@example.com" {...field} autoFocus />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -90,19 +92,33 @@ export default function LoginPage() {
                                     <FormItem>
                                         <FormLabel>Password</FormLabel>
                                         <FormControl>
-                                            <Input type="password" {...field} />
+                                            <Input type="password" placeholder="••••••••" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full" disabled={loading}>
-                                {loading ? "Signing in..." : "Sign in"}
+                            <Button type="submit" className="w-full font-semibold" disabled={loading}>
+                                {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
                             </Button>
                         </form>
                     </Form>
                 </CardContent>
             </Card>
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex h-screen items-center justify-center">
+                    <div className="h-8 w-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+                </div>
+            }
+        >
+            <LoginForm />
+        </Suspense>
     )
 }

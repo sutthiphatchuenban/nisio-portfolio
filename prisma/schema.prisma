@@ -179,3 +179,60 @@ model Video {
 
   @@map("videos")
 }
+
+model MeetingRoom {
+  id           String   @id @default(uuid())
+  code         String   @unique @db.VarChar(50)
+  name         String   @db.VarChar(255)
+  passcode     String?  @db.VarChar(255)
+  hostName     String   @map("host_name") @db.VarChar(255)
+  hostAvatar   String?  @map("host_avatar") @db.Text
+  hostColor    String?  @map("host_color") @db.VarChar(50)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  messages     MeetingMessage[]
+  participants MeetingParticipant[]
+
+  @@map("meeting_rooms")
+}
+
+model MeetingParticipant {
+  id         String   @id @default(uuid())
+  roomId     String   @map("room_id")
+  name       String   @db.VarChar(255)
+  avatar     String?  @db.Text
+  color      String?  @db.VarChar(50)
+  isHost     Boolean  @default(false) @map("is_host")
+  lastActive DateTime @default(now()) @map("last_active")
+  joinedAt   DateTime @default(now()) @map("joined_at")
+
+  room MeetingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, name])
+  @@map("meeting_participants")
+}
+
+model MeetingMessage {
+  id           String   @id @default(uuid())
+  roomId       String   @map("room_id")
+  senderName   String   @map("sender_name") @db.VarChar(255)
+  senderColor  String?  @map("sender_color") @db.VarChar(50)
+  senderAvatar String?  @map("sender_avatar") @db.Text
+  isHost       Boolean  @default(false) @map("is_host")
+  type         String   @default("text") @db.VarChar(50)
+  content      String   @db.Text
+  fileUrl      String?  @map("file_url") @db.Text
+  fileName     String?  @map("file_name") @db.VarChar(255)
+  fileSize     Int?     @map("file_size")
+  fileType     String?  @map("file_type") @db.VarChar(100)
+  reactions    Json     @default("[]")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  room MeetingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+  @@map("meeting_messages")
+}
+

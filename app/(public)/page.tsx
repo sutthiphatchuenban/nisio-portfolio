@@ -121,7 +121,7 @@ export const revalidate = 0
 
 async function getHomePageData() {
     try {
-        const [projects, posts, skills, settings, videos] = await Promise.all([
+        const fetchPromise = Promise.all([
             // Featured Projects
             prisma.project.findMany({
                 where: { featured: true, status: 'published' },
@@ -153,6 +153,13 @@ async function getHomePageData() {
             }),
         ])
 
+        const [projects, posts, skills, settings, videos] = await Promise.race([
+            fetchPromise,
+            new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error('Database query timeout')), 2500)
+            ),
+        ])
+
         return {
             projects: projects as unknown as Project[],
             posts: posts as unknown as BlogPost[],
@@ -161,13 +168,30 @@ async function getHomePageData() {
             settings
         }
     } catch (error) {
-        console.error('Failed to fetch home page data:', error)
+        console.warn('Database connection unavailable, using fallback data:', (error as Error).message)
         return {
             projects: [],
             posts: [],
             skills: [],
             videos: [],
-            settings: null
+            settings: {
+                id: 'default',
+                siteName: 'PORTX',
+                siteDescription: 'Personal portfolio website',
+                name: 'Sutthiphat Chuenban',
+                title: 'Full Stack Developer',
+                bio: 'Passionate developer creating modern web applications.',
+                avatar: null,
+                heroImage: null,
+                heroImageMobile: null,
+                email: 'sutthiphatchuenban@gmail.com',
+                location: 'Thailand',
+                resumeUrl: null,
+                githubUrl: null,
+                linkedinUrl: null,
+                twitterUrl: null,
+                updatedAt: new Date(),
+            } as any
         }
     }
 }

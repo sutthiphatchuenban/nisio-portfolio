@@ -6,29 +6,41 @@ import { authOptions } from '@/lib/auth'
 const DEFAULT_SETTINGS_ID = 'default'
 
 export async function GET() {
+    const defaultData = {
+        id: DEFAULT_SETTINGS_ID,
+        siteName: 'PORTX',
+        siteDescription: 'Personal portfolio website',
+        name: 'Sutthiphat Chuenban',
+        title: 'Full Stack Developer',
+        bio: 'I am a passionate developer creating modern web applications.',
+        email: 'sutthiphatchuenban@gmail.com',
+        location: 'Thailand',
+        avatar: null,
+        heroImage: null,
+        heroImageMobile: null,
+        resumeUrl: null,
+        githubUrl: null,
+        linkedinUrl: null,
+        twitterUrl: null,
+        updatedAt: new Date(),
+    }
+
     try {
-        let settings = await prisma.siteSettings.findUnique({
+        const fetchPromise = prisma.siteSettings.findUnique({
             where: { id: DEFAULT_SETTINGS_ID }
         })
+        const settings: any = await Promise.race([
+            fetchPromise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), 2500))
+        ])
 
-        // Create default settings if not exists
-        if (!settings) {
-            settings = await prisma.siteSettings.create({
-                data: {
-                    id: DEFAULT_SETTINGS_ID,
-                    siteName: 'PORTX',
-                    siteDescription: 'Personal portfolio website',
-                    name: 'Your Name',
-                    title: 'Full Stack Developer',
-                    bio: 'I am a passionate developer...',
-                }
-            })
+        if (settings) {
+            return NextResponse.json(settings)
         }
 
-        return NextResponse.json(settings)
+        return NextResponse.json(defaultData)
     } catch (error) {
-        console.error(error)
-        return NextResponse.json({ message: 'Failed to fetch settings' }, { status: 500 })
+        return NextResponse.json(defaultData)
     }
 }
 
