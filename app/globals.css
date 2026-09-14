@@ -369,9 +369,16 @@
   }
 }
 
-/* ===== MARKDOWN BODY OVERFLOW FIX ===== */
-/* Applied via CSS instead of className to avoid hydration mismatch */
+/* ===== MARKDOWN CONTENT ===== */
+/*
+ * Markdown is intentionally styled with the app's semantic theme variables.
+ * Do not use fixed light/dark colors here: the site supports six themes and
+ * the same content renderer is used on both public and admin surfaces.
+ */
 .markdown-body {
+  color: var(--foreground);
+  font-size: 0.98rem;
+  line-height: 1.85;
   overflow-wrap: break-word;
   word-break: break-word;
   min-width: 0;
@@ -382,8 +389,331 @@
   max-width: 100%;
 }
 
+.markdown-body > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body .markdown-heading {
+  color: var(--foreground);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  scroll-margin-top: 6rem;
+}
+
+.markdown-body .markdown-h1 {
+  margin: 2rem 0 0.75rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--border);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+}
+
+.markdown-body .markdown-h2 {
+  margin: 1.75rem 0 0.65rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--border);
+  font-size: clamp(1.45rem, 2.5vw, 1.8rem);
+}
+
+.markdown-body .markdown-h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.3rem;
+}
+
+.markdown-body .markdown-h4 {
+  margin: 1.25rem 0 0.4rem;
+  font-size: 1.1rem;
+}
+
+.markdown-body .markdown-h5 {
+  margin: 1.1rem 0 0.35rem;
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.markdown-body .markdown-h6 {
+  margin: 1rem 0 0.3rem;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+.markdown-body .markdown-paragraph,
+.markdown-body .markdown-html-block {
+  margin: 0.75rem 0;
+  color: var(--foreground);
+}
+
+.markdown-body .markdown-link {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 150ms ease;
+}
+
+.markdown-body .markdown-link:hover {
+  color: var(--accent-foreground);
+}
+
+.markdown-body .markdown-inline-code {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, var(--border));
+  border-radius: 0.4rem;
+  background: color-mix(in oklch, var(--primary) 9%, var(--card));
+  color: var(--primary);
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.markdown-body .markdown-list {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+  color: var(--foreground);
+}
+
+.markdown-body .markdown-list-unordered {
+  list-style: disc;
+}
+
+.markdown-body .markdown-list-ordered {
+  list-style: decimal;
+}
+
+.markdown-body .markdown-list-item {
+  margin: 0.3rem 0;
+  padding-left: 0.15rem;
+}
+
+.markdown-body .markdown-list-item::marker {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.markdown-body .markdown-blockquote {
+  margin: 1rem 0;
+  padding: 0.65rem 1rem;
+  border-left: 3px solid var(--primary);
+  border-radius: 0 0.75rem 0.75rem 0;
+  background: color-mix(in oklch, var(--primary) 8%, var(--card));
+  color: var(--muted-foreground);
+}
+
+.markdown-body .markdown-blockquote > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-body .markdown-blockquote > *:last-child {
+  margin-bottom: 0;
+}
+
 .markdown-body pre {
   overflow-x: auto;
+}
+
+.markdown-body .markdown-code-block {
+  width: 100%;
+  margin: 1.25rem 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--background);
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--background) 35%, transparent);
+}
+
+.markdown-body .markdown-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.75rem 0.45rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklch, var(--card) 82%, var(--background));
+}
+
+.markdown-body .markdown-code-language {
+  color: var(--muted-foreground);
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+
+.markdown-body .markdown-code-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  background: var(--muted);
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 0.72rem;
+  line-height: 1;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.markdown-body .markdown-code-copy:hover,
+.markdown-body .markdown-code-copy:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  outline: none;
+}
+
+.markdown-body .markdown-code-block pre.markdown-code {
+  margin: 0 !important;
+  padding: 1rem !important;
+  background: transparent !important;
+  color: var(--foreground);
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.75;
+  overflow-x: auto;
+}
+
+.markdown-body .markdown-code-block pre.markdown-code code {
+  display: block;
+  min-width: max-content;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: pre;
+}
+
+/* Prism token colors use semantic variables so code remains readable in every theme. */
+.markdown-body .markdown-code-block .token.comment,
+.markdown-body .markdown-code-block .token.prolog,
+.markdown-body .markdown-code-block .token.doctype,
+.markdown-body .markdown-code-block .token.cdata {
+  color: var(--muted-foreground);
+}
+
+.markdown-body .markdown-code-block .token.punctuation,
+.markdown-body .markdown-code-block .token.operator {
+  color: var(--foreground);
+}
+
+.markdown-body .markdown-code-block .token.property,
+.markdown-body .markdown-code-block .token.tag,
+.markdown-body .markdown-code-block .token.boolean,
+.markdown-body .markdown-code-block .token.number,
+.markdown-body .markdown-code-block .token.constant,
+.markdown-body .markdown-code-block .token.symbol {
+  color: var(--primary);
+}
+
+.markdown-body .markdown-code-block .token.selector,
+.markdown-body .markdown-code-block .token.attr-name,
+.markdown-body .markdown-code-block .token.string,
+.markdown-body .markdown-code-block .token.char,
+.markdown-body .markdown-code-block .token.builtin {
+  color: var(--accent-foreground);
+}
+
+.markdown-body .markdown-code-block .token.atrule,
+.markdown-body .markdown-code-block .token.attr-value,
+.markdown-body .markdown-code-block .token.keyword,
+.markdown-body .markdown-code-block .token.function,
+.markdown-body .markdown-code-block .token.class-name {
+  color: var(--accent);
+}
+
+.markdown-body .markdown-code-block .token.regex,
+.markdown-body .markdown-code-block .token.important,
+.markdown-body .markdown-code-block .token.variable {
+  color: var(--destructive);
+}
+
+.markdown-body .markdown-table-wrap {
+  width: 100%;
+  margin: 1rem 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.markdown-body .markdown-table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  color: var(--foreground);
+  font-size: 0.88rem;
+}
+
+.markdown-body .markdown-table-cell {
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-body .markdown-table-heading-cell {
+  color: var(--card-foreground);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.markdown-body .markdown-table-head {
+  background: var(--muted);
+}
+
+.markdown-body .markdown-table-row:nth-child(even) {
+  background: color-mix(in oklch, var(--muted) 38%, transparent);
+}
+
+.markdown-body .markdown-table-row:last-child .markdown-table-cell {
+  border-bottom: 0;
+}
+
+.markdown-body .markdown-image {
+  display: block;
+  height: auto;
+  max-height: 42rem;
+  margin: 1rem auto;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  box-shadow: 0 8px 24px color-mix(in oklch, var(--background) 30%, transparent);
+  object-fit: contain;
+}
+
+.markdown-body .markdown-rule {
+  margin: 1.75rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.markdown-body .markdown-strong {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.markdown-body .markdown-emphasis {
+  color: var(--foreground);
+}
+
+.markdown-body .markdown-strikethrough {
+  color: var(--muted-foreground);
+}
+
+.markdown-body .markdown-checkbox {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-right: 0.45rem;
+  accent-color: var(--primary);
+  vertical-align: -0.12rem;
 }
 
 .markdown-body img {
