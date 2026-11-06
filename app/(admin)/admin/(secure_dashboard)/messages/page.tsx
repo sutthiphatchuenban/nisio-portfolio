@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { AdminPageHeader, AdminSearch, AdminFilter, AdminSummary, AdminEmpty } from "@/components/admin/AdminPage"
 import axios from "axios"
 import { toast } from "sonner"
 import { Trash2, Loader2, Eye, MailOpen, Mail } from "lucide-react"
@@ -27,6 +28,8 @@ import type { Contact } from "@/types"
 
 export default function AdminMessagesPage() {
     const [messages, setMessages] = useState<Contact[]>([])
+    const [query, setQuery] = useState("")
+    const [filter, setFilter] = useState("all")
     const [isLoading, setIsLoading] = useState(true)
     const [selectedMessage, setSelectedMessage] = useState<Contact | null>(null)
 
@@ -70,77 +73,27 @@ export default function AdminMessagesPage() {
         }
     }
 
+    const unread = messages.filter(message => message.status === "pending").length
+    const filteredMessages = messages.filter(message => [message.name, message.email, message.subject, message.message].join(" ").toLowerCase().includes(query.trim().toLowerCase()) && (filter === "all" || (filter === "unread" ? message.status === "pending" : message.status !== "pending")))
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Messages</h1>
-            </div>
-
-            <div className="rounded-md border bg-card p-1">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>From</TableHead>
-                            <TableHead>Subject</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin inline" /> Loading...
-                                </TableCell>
-                            </TableRow>
-                        ) : messages.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">No messages.</TableCell>
-                            </TableRow>
-                        ) : (
-                            messages.map((msg) => (
-                                <TableRow
-                                    key={msg.id}
-                                    className="cursor-pointer hover:bg-muted/50"
-                                    onClick={() => handleView(msg)}
-                                >
-                                    <TableCell className="whitespace-nowrap text-muted-foreground w-[150px]">
-                                        {msg.createdAt ? format(new Date(msg.createdAt), 'MMM d, yyyy') : '-'}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="font-medium">{msg.name}</div>
-                                        <div className="text-xs text-muted-foreground">{msg.email}</div>
-                                    </TableCell>
-                                    <TableCell className="max-w-[300px] truncate">
-                                        {msg.subject || "(No Subject)"}
-                                    </TableCell>
-                                    <TableCell>
-                                        {msg.status === 'pending' ? (
-                                            <Badge variant="default" className="bg-blue-500">Unread</Badge>
-                                        ) : (
-                                            <Badge variant="secondary">Read</Badge>
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                            onClick={(e) => handleDelete(msg.id, e)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+            <AdminPageHeader eyebrow="Messages" title="กล่องข้อความ" description="ติดตามการติดต่อจากผู้เข้าชมเว็บไซต์และข้อความที่ยังรออ่าน" />
+            <AdminSummary items={[{label:"ข้อความทั้งหมด",value:messages.length,icon:Mail},{label:"ยังไม่ได้อ่าน",value:unread,icon:Eye},{label:"อ่านแล้ว",value:messages.length-unread,icon:MailOpen}]} />
+            <div className="admin-toolbar"><AdminSearch value={query} onChange={setQuery} placeholder="ค้นหาชื่อ อีเมล หรือข้อความ…" /><AdminFilter value={filter} onChange={setFilter} options={[{value:"all",label:"ทั้งหมด",count:messages.length},{value:"unread",label:"ยังไม่อ่าน",count:unread},{value:"read",label:"อ่านแล้ว",count:messages.length-unread}]} /></div>
+            <p className="text-xs text-muted-foreground">แสดง {filteredMessages.length} จาก {messages.length} ข้อความ · เปิดข้อความเพื่อทำเครื่องหมายว่าอ่านแล้ว</p>
+            <section aria-label="รายการข้อความ" className="overflow-hidden rounded-2xl border bg-card">
+                {isLoading ? <div role="status" className="flex items-center justify-center gap-3 p-12 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />กำลังโหลดข้อความ…</div> : !filteredMessages.length ? <AdminEmpty icon={Mail} title={query || filter !== "all" ? "ไม่พบข้อความที่ตรงกัน" : "ยังไม่มีข้อความ"} description="ข้อความที่ส่งผ่านหน้าติดต่อจะแสดงในกล่องนี้" /> : filteredMessages.map(message => <article key={message.id} className={"group flex min-w-0 items-start gap-2 border-b p-4 last:border-0 sm:gap-4 sm:p-5 " + (message.status === "pending" ? "bg-primary/[0.035]" : "")}>
+                    <button type="button" onClick={() => handleView(message)} className="flex min-w-0 flex-1 items-start gap-3 text-left sm:gap-4">
+                        <span className={"flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold " + (message.status === "pending" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>{message.name.slice(0,1).toUpperCase()}</span>
+                        <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1"><span className="flex min-w-0 items-center gap-2 text-sm font-medium">{message.name}{message.status === "pending" && <span aria-label="ยังไม่ได้อ่าน" className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}</span><time className="text-[10px] text-muted-foreground">{format(new Date(message.createdAt),"d MMM yyyy")}</time></span><span className="mt-1 block truncate text-[11px] text-muted-foreground">{message.email}</span><span className="mt-3 block truncate text-sm font-medium">{message.subject || "ไม่มีหัวข้อ"}</span><span className="mt-1 block line-clamp-2 break-words text-xs leading-6 text-muted-foreground">{message.message}</span></span>
+                    </button>
+                    <Button variant="ghost" size="icon" aria-label={"ลบข้อความจาก " + message.name} onClick={event => handleDelete(message.id,event)} className="h-10 w-10 shrink-0 rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                </article>)}
+            </section>
 
             <Dialog open={!!selectedMessage} onOpenChange={(open) => !open && setSelectedMessage(null)}>
-                <DialogContent className="max-w-xl">
+                <DialogContent className="admin-dialog sm:max-w-xl">
                     <DialogHeader>
                         <DialogTitle>{selectedMessage?.subject || "Message Details"}</DialogTitle>
                         <DialogDescription>
@@ -150,13 +103,13 @@ export default function AdminMessagesPage() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="mt-4 p-4 rounded-md bg-muted text-sm whitespace-pre-wrap leading-relaxed">
+                    <div className="mt-1 rounded-xl border bg-muted/25 p-5 text-sm leading-7 whitespace-pre-wrap break-words">
                         {selectedMessage?.message}
                     </div>
 
-                    <div className="flex justify-end gap-2 mt-4">
-                        <Button variant="outline" onClick={() => setSelectedMessage(null)}>Close</Button>
-                        <Button variant="destructive" onClick={(e) => selectedMessage && handleDelete(selectedMessage.id, e as any)}>Delete</Button>
+                    <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
+                        <Button variant="outline" onClick={() => setSelectedMessage(null)}>ปิด</Button>
+                        <Button variant="destructive" onClick={(e) => selectedMessage && handleDelete(selectedMessage.id, e as any)}>ลบข้อความ</Button>
                     </div>
                 </DialogContent>
             </Dialog>

@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { AdminPageHeader, AdminSearch, AdminFilter, AdminSummary, AdminEmpty } from "@/components/admin/AdminPage"
+import { FolderKanban, Layers, CircleCheck, FileClock } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -59,6 +61,8 @@ type ProjectFormValues = z.infer<typeof projectSchema>
 
 export default function AdminProjectsPage() {
     const [projects, setProjects] = useState<Project[]>([])
+    const [query, setQuery] = useState("")
+    const [filter, setFilter] = useState("all")
     const [isLoading, setIsLoading] = useState(true)
     const [isOpen, setIsOpen] = useState(false)
     const [editingProject, setEditingProject] = useState<Project | null>(null)
@@ -155,21 +159,19 @@ export default function AdminProjectsPage() {
         }
     }
 
+    const visibleProjects = projects.filter(project => ([project.title, project.shortDescription, ...project.technologies].join(" ")).toLowerCase().includes(query.trim().toLowerCase()) && (filter === "all" || project.status === filter))
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-                <Button onClick={() => setIsOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Project
-                </Button>
-            </div>
+            <AdminPageHeader eyebrow="projects" title="โปรเจกต์" description="จัดการผลงาน รูปภาพ และสถานะการเผยแพร่ในพอร์ตโฟลิโอของคุณ"><Button onClick={() => setIsOpen(true)} className="rounded-xl"><Plus className="h-4 w-4" />เพิ่มโปรเจกต์</Button></AdminPageHeader>
+            <AdminSummary items={[{ label: "โปรเจกต์ทั้งหมด", value: projects.length, icon: FolderKanban }, { label: "เผยแพร่แล้ว", value: projects.filter(p => p.status === "published").length, icon: CircleCheck }, { label: "ฉบับร่าง", value: projects.filter(p => p.status === "draft").length, icon: FileClock }]} />
 
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="admin-dialog sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editingProject ? "Edit Project" : "New Project"}</DialogTitle>
+                        <DialogTitle>{editingProject ? "แก้ไขโปรเจกต์" : "เพิ่มโปรเจกต์ใหม่"}</DialogTitle>
                         <DialogDescription>
-                            {editingProject ? "Make changes to your project here." : "Add a new project to your portfolio."}
+                            {editingProject ? "Make changes to your project here." : "กรอกรายละเอียดและรูปภาพของผลงานที่ต้องการแสดงบนเว็บไซต์"}
                         </DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
@@ -179,7 +181,7 @@ export default function AdminProjectsPage() {
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Title</FormLabel>
+                                        <FormLabel>ชื่อ</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Project Name" {...field} />
                                         </FormControl>
@@ -192,7 +194,7 @@ export default function AdminProjectsPage() {
                                 name="shortDescription"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Short Description</FormLabel>
+                                        <FormLabel>คำอธิบายสั้น</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Brief summary for cards" {...field} />
                                         </FormControl>
@@ -205,7 +207,7 @@ export default function AdminProjectsPage() {
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Full Description (Markdown supported)</FormLabel>
+                                        <FormLabel>รายละเอียด (Markdown)</FormLabel>
                                         <FormControl>
                                             <Textarea className="h-32" placeholder="Detailed description..." {...field} />
                                         </FormControl>
@@ -213,7 +215,7 @@ export default function AdminProjectsPage() {
                                     </FormItem>
                                 )}
                             />
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="projectUrl"
@@ -246,10 +248,9 @@ export default function AdminProjectsPage() {
                                 name="imageUrl"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Thumbnail Image</FormLabel>
+                                        <FormLabel>ภาพหน้าปก</FormLabel>
                                         <FormControl>
-                                            <ImageUpload
-                                                value={field.value}
+                                            <ImageUpload preview="original"                                                 value={field.value}
                                                 onChange={field.onChange}
                                             />
                                         </FormControl>
@@ -329,22 +330,24 @@ export default function AdminProjectsPage() {
                                 )}
                             />
                             <DialogFooter>
-                                <Button type="submit">Save changes</Button>
+                                <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={form.formState.isSubmitting}>ยกเลิก</Button><Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}บันทึกการเปลี่ยนแปลง</Button>
                             </DialogFooter>
                         </form>
                     </Form>
                 </DialogContent>
             </Dialog>
 
-            <div className="rounded-md border bg-card p-1">
-                <Table>
+            <div className="admin-toolbar"><AdminSearch value={query} onChange={setQuery} placeholder="ค้นหาโปรเจกต์…" /><AdminFilter value={filter} onChange={setFilter} options={[{value:"all", label:"ทั้งหมด",count:projects.length},{value:"published",label:"เผยแพร่แล้ว",count:projects.filter(p => p.status === "published").length},{value:"draft",label:"ฉบับร่าง",count:projects.filter(p => p.status === "draft").length}, {value:"archived",label:"เก็บถาวร"}]} /></div>
+            <p className="text-xs text-muted-foreground">แสดง {visibleProjects.length} จาก {projects.length} รายการ</p>
+            <div className="admin-collection">
+                <Table className="admin-data-table">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Title</TableHead>
-                            <TableHead className="hidden md:table-cell">Tech Stack</TableHead>
-                            <TableHead className="hidden sm:table-cell">Status</TableHead>
-                            <TableHead>Featured</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>ชื่อ</TableHead>
+                            <TableHead className="hidden md:table-cell">เทคโนโลยี</TableHead>
+                            <TableHead className="hidden sm:table-cell">สถานะ</TableHead>
+                            <TableHead>แนะนำ</TableHead>
+                            <TableHead className="text-right">จัดการ</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -354,31 +357,31 @@ export default function AdminProjectsPage() {
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin inline" /> Loading...
                                 </TableCell>
                             </TableRow>
-                        ) : projects.length === 0 ? (
+                        ) : visibleProjects.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">No projects found.</TableCell>
+                                <TableCell colSpan={5} className="h-24 text-center"><AdminEmpty icon={FolderKanban} title={query || filter !== "all" ? "ไม่พบรายการที่ตรงกัน" : "ยังไม่มีโปรเจกต์"} description={query || filter !== "all" ? "ลองเปลี่ยนคำค้นหาหรือตัวกรอง" : "เริ่มเพิ่มโปรเจกต์ด้วยปุ่มด้านบน"} /></TableCell>
                             </TableRow>
                         ) : (
-                            projects.map((project) => (
+                            visibleProjects.map((project) => (
                                 <TableRow key={project.id}>
-                                    <TableCell className="font-medium">{project.title}</TableCell>
-                                    <TableCell className="hidden md:table-cell">
+                                    <TableCell data-label="Title" className="font-medium"><div className="flex min-w-0 items-center gap-3">{project.imageUrl ? <img src={project.imageUrl} alt="" loading="lazy" className="h-12 w-20 shrink-0 rounded-lg border object-cover" /> : <div className="flex h-12 w-20 shrink-0 items-center justify-center rounded-lg border bg-muted"><FolderKanban className="h-5 w-5 text-muted-foreground" /></div>}<div className="min-w-0"><p className="line-clamp-2 font-medium">{project.title}</p>{project.shortDescription && <p className="mt-1 line-clamp-1 text-xs font-normal text-muted-foreground">{project.shortDescription}</p>}</div></div></TableCell>
+                                    <TableCell data-label="Tech Stack" className="hidden md:table-cell">
                                         <div className="flex flex-wrap gap-1">
                                             {project.technologies.slice(0, 3).map(t => (
                                                 <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
                                             ))}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="hidden sm:table-cell capitalize">{project.status}</TableCell>
-                                    <TableCell>
-                                        {project.featured ? <Badge variant="default">Yes</Badge> : <span className="text-muted-foreground text-sm">-</span>}
+                                    <TableCell data-label="Status" className="hidden sm:table-cell"><Badge variant="outline" className="gap-1.5"><span className={"h-1.5 w-1.5 rounded-full " + (project.status === "published" ? "bg-emerald-500" : project.status === "draft" ? "bg-amber-500" : "bg-muted-foreground")} />{project.status === "published" ? "เผยแพร่แล้ว" : project.status === "draft" ? "ฉบับร่าง" : "เก็บถาวร"}</Badge></TableCell>
+                                    <TableCell data-label="Featured">
+                                        {project.featured ? <Badge variant="secondary">แนะนำ</Badge> : <span className="text-muted-foreground text-sm">-</span>}
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell data-label="Actions" className="text-right">
                                         <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(project)}>
+                                            <Button aria-label={"แก้ไข " + project.title} variant="ghost" size="icon" onClick={() => handleEdit(project)}>
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(project.id)}>
+                                            <Button aria-label={"ลบ " + project.title} variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(project.id)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>

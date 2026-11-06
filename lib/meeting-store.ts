@@ -522,22 +522,25 @@ export const MeetingStore = {
     },
 
     // 9. Close Room & Delete All Uploaded Files from Cloudinary Storage
-    async closeAndCleanupRoom(roomCode: string, requesterName: string): Promise<{
+    async closeAndCleanupRoom(roomCode: string, requesterName: string, isAdmin = false): Promise<{
         success: boolean
         error?: string
+        errorCode?: 'ROOM_NOT_FOUND' | 'FORBIDDEN'
         deletedFilesCount: number
     }> {
         const code = roomCode.toLowerCase().trim()
         const room = await this.getRoom(code)
 
         if (!room) {
-            return { success: false, error: 'ไม่พบห้องประชุมนี้', deletedFilesCount: 0 }
+            return { success: false, error: 'ไม่พบห้องประชุมนี้', errorCode: 'ROOM_NOT_FOUND', deletedFilesCount: 0 }
         }
 
         // Check if requester is host (or admin)
-        if (room.hostName && requesterName && room.hostName.toLowerCase() !== requesterName.toLowerCase()) {
-            return { success: false, error: 'เฉพาะผู้สร้างห้อง (Host) เท่านั้นที่สามารถปิดห้องประชุมได้', deletedFilesCount: 0 }
+        if (!requesterName?.trim() || (!isAdmin && room.hostName.trim().toLowerCase() !== requesterName.trim().toLowerCase())) {
+            return { success: false, error: 'เฉพาะผู้สร้างห้อง (Host) หรือผู้ดูแลระบบเท่านั้นที่สามารถปิดห้องประชุมได้', errorCode: 'FORBIDDEN', deletedFilesCount: 0 }
         }
+
+        if (!room.isActive) return { success: true, deletedFilesCount: 0 }
 
         const messages = store.messages.get(code) || []
         const fileMessages = messages.filter((m) => m.type === 'file' && (m.filePublicId || m.fileUrl))
@@ -591,6 +594,7 @@ export const MeetingStore = {
             reactions: [],
             createdAt: now,
         }
+        if (!store.messages.has(code)) store.messages.set(code, [])
         store.messages.get(code)!.push(closeMsg)
 
         // 4. Update Database

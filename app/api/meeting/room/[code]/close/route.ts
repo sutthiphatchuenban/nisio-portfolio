@@ -14,16 +14,20 @@ export async function POST(
 
         const session = await getServerSession(authOptions)
         const isAdmin = session?.user?.role === 'ADMIN'
+        if (!isAdmin && (typeof requesterName !== 'string' || !requesterName.trim())) {
+            return NextResponse.json({ message: 'กรุณาระบุชื่อผู้ขอปิดห้อง' }, { status: 400 })
+        }
 
         const result = await MeetingStore.closeAndCleanupRoom(
             code,
-            isAdmin ? session?.user?.name || requesterName || 'Admin' : requesterName
+            isAdmin ? session?.user?.name || 'Admin' : requesterName,
+            isAdmin
         )
 
-        if (!result.success && !isAdmin) {
+        if (!result.success) {
             return NextResponse.json(
                 { message: result.error || 'ไม่สามารถปิดห้องประชุมได้' },
-                { status: 403 }
+                { status: result.errorCode === 'ROOM_NOT_FOUND' ? 404 : 403 }
             )
         }
 

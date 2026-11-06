@@ -3,11 +3,14 @@ import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+export const dynamic = "force-dynamic"
+
 const DEFAULT_SETTINGS_ID = 'default'
 
 export async function GET() {
     const defaultData = {
         id: DEFAULT_SETTINGS_ID,
+        autoSeasonalTheme: false,
         siteName: 'PORTX',
         siteDescription: 'Personal portfolio website',
         name: 'Sutthiphat Chuenban',
@@ -31,7 +34,7 @@ export async function GET() {
         })
         const settings: any = await Promise.race([
             fetchPromise,
-            new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), 2500))
+            new Promise((_, reject) => setTimeout(() => reject(new Error('DB Timeout')), 15000))
         ])
 
         if (settings) {
@@ -40,7 +43,7 @@ export async function GET() {
 
         return NextResponse.json(defaultData)
     } catch (error) {
-        return NextResponse.json(defaultData)
+        return NextResponse.json({ message: 'Settings temporarily unavailable' }, { status: 503 })
     }
 }
 
@@ -52,10 +55,14 @@ export async function PUT(request: Request) {
 
     try {
         const body = await request.json()
+        if (body.autoSeasonalTheme !== undefined && typeof body.autoSeasonalTheme !== "boolean") {
+            return NextResponse.json({ message: "Invalid seasonal theme setting" }, { status: 400 })
+        }
 
         const settings = await prisma.siteSettings.upsert({
             where: { id: DEFAULT_SETTINGS_ID },
             update: {
+                autoSeasonalTheme: body.autoSeasonalTheme,
                 siteName: body.siteName,
                 siteDescription: body.siteDescription,
                 name: body.name,
@@ -72,6 +79,7 @@ export async function PUT(request: Request) {
                 twitterUrl: body.twitterUrl,
             },
             create: {
+                autoSeasonalTheme: body.autoSeasonalTheme ?? false,
                 id: DEFAULT_SETTINGS_ID,
                 siteName: body.siteName,
                 siteDescription: body.siteDescription,

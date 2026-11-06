@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, use } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -151,6 +152,7 @@ export default function MeetingRoomPage({
     params: Promise<{ roomCode: string }>
 }) {
     const router = useRouter()
+    const { data: session } = useSession()
     const resolvedParams = use(params)
     const roomCode = resolvedParams.roomCode.toLowerCase().trim()
 
@@ -163,6 +165,7 @@ export default function MeetingRoomPage({
         passcode?: string
     } | null>(null)
     const [isJoined, setIsJoined] = useState(false)
+    const canCloseRoom = session?.user?.role === "ADMIN" || currentUser?.isHost === true
     const [isLoadingRoom, setIsLoadingRoom] = useState(true)
 
     // Join Gate State
@@ -187,7 +190,7 @@ export default function MeetingRoomPage({
     const [isClosingRoom, setIsClosingRoom] = useState(false)
 
     // UI Drawer & Lightbox
-    const [activeSidebarTab, setActiveSidebarTab] = useState<"participants" | "files" | null>("participants")
+    const [activeSidebarTab, setActiveSidebarTab] = useState<"participants" | "files" | null>(null)
     const [lightboxImage, setLightboxImage] = useState<{ url: string; name: string } | null>(null)
     const [activeReactionMessageId, setActiveReactionMessageId] = useState<string | null>(null)
     const [isDraggingOver, setIsDraggingOver] = useState(false)
@@ -205,6 +208,23 @@ export default function MeetingRoomPage({
     const fileInputRef = useRef<HTMLInputElement | null>(null)
     const sseRef = useRef<EventSource | null>(null)
     const lastTimestampRef = useRef<number>(0)
+
+    useEffect(() => {
+        const desktop = window.matchMedia("(min-width: 1024px)")
+        if (desktop.matches) setActiveSidebarTab("participants")
+        const onResize = () => setActiveSidebarTab(null)
+        desktop.addEventListener("change", onResize)
+        return () => desktop.removeEventListener("change", onResize)
+    }, [])
+
+    useEffect(() => {
+        if (!activeSidebarTab) return
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") setActiveSidebarTab(null)
+        }
+        window.addEventListener("keydown", onKeyDown)
+        return () => window.removeEventListener("keydown", onKeyDown)
+    }, [activeSidebarTab])
 
     // 1. Initial Room Info and Auth Check
     useEffect(() => {
@@ -707,7 +727,7 @@ export default function MeetingRoomPage({
             })
 
             const data = await res.json()
-            if (!res.ok) {
+            if (!res.ok || data.success !== true) {
                 throw new Error(data.message || "ไม่สามารถปิดห้องประชุมได้")
             }
 
@@ -1004,7 +1024,7 @@ export default function MeetingRoomPage({
     // 5. Main Real-time Meeting Room View
     return (
         <div
-            className="flex flex-col h-[calc(100vh-3.5rem)] bg-background relative overflow-hidden select-text"
+            className="flex h-full min-h-0 min-w-0 flex-col bg-background relative overflow-hidden select-text"
             onDragOver={(e) => {
                 e.preventDefault()
                 setIsDraggingOver(true)
@@ -1033,7 +1053,7 @@ export default function MeetingRoomPage({
             </AnimatePresence>
 
             {/* Room Header Top Bar */}
-            <header className="h-14 border-b bg-card/70 backdrop-blur-xl px-3 sm:px-5 flex items-center justify-between shrink-0 z-20">
+            <header className="min-h-14 border-b bg-card/70 backdrop-blur-xl px-3 py-2 sm:px-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between shrink-0 z-20">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                     {/* Room Logo Chip */}
                     <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
@@ -1041,7 +1061,7 @@ export default function MeetingRoomPage({
                     </div>
                     <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                            <h2 className="font-bold text-sm sm:text-base truncate max-w-[110px] sm:max-w-[240px]">
+                            <h2 className="font-bold text-sm sm:text-base truncate max-w-[calc(100vw-5rem)] sm:max-w-[240px]">
                                 {roomInfo?.name || "Meeting Room"}
                             </h2>
                             {roomInfo?.hasPasscode && (
@@ -1059,7 +1079,7 @@ export default function MeetingRoomPage({
                 </div>
 
                 {/* Right Action Buttons */}
-                <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                <div className="flex w-full flex-wrap items-center gap-0.5 sm:w-auto sm:gap-1.5 shrink-0">
                     {/* Copy Link Button */}
                     <Button
                         variant="outline"
@@ -1102,6 +1122,9 @@ export default function MeetingRoomPage({
                     <Button
                         variant={activeSidebarTab ? "default" : "outline"}
                         size="sm"
+                        aria-label="ผู้เข้าร่วมและไฟล์แชร์"
+                        aria-expanded={activeSidebarTab !== null}
+                        aria-controls="meeting-sidebar"
                         onClick={() => setActiveSidebarTab(activeSidebarTab ? null : "participants")}
                         className={`h-9 px-2.5 text-xs flex items-center gap-1.5 font-medium rounded-lg ${
                             activeSidebarTab
@@ -1109,7 +1132,7 @@ export default function MeetingRoomPage({
                                 : "bg-background/60 border-border/60 hover:border-primary/40"
                         }`}
                     >
-                        <span className="relative flex h-2 w-2">
+                        <span className="relative hidden sm:flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
@@ -1118,37 +1141,38 @@ export default function MeetingRoomPage({
                     </Button>
 
                     {/* Host End Meeting & Delete Storage Button */}
-                    {currentUser?.isHost ? (
+                    {canCloseRoom && (
                         <Button
                             variant="destructive"
                             size="sm"
                             onClick={() => setShowCloseModal(true)}
-                            className="h-9 px-2.5 sm:px-3 text-xs flex items-center gap-1.5 font-medium shadow-md shadow-destructive/20 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg"
+                            className="h-9 px-2.5 sm:px-3 text-xs flex items-center gap-1.5 font-medium shadow-md shadow-destructive/20 bg-red-700 text-white hover:bg-red-800 rounded-lg"
                             title="ปิดห้องประชุมและลบไฟล์ทั้งหมดใน Cloudinary"
+                            aria-label="ปิดห้องประชุม"
                         >
                             <Power className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">ปิดการประชุม</span>
+                            <span>ปิดห้อง<span className="hidden sm:inline">ประชุม</span></span>
                         </Button>
-                    ) : (
+                    )}
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={handleLeaveRoom}
                             className="h-9 w-9 rounded-lg text-destructive hover:bg-destructive/10"
                             title="ออกจากห้องประชุม"
+                            aria-label="ออกจากห้องประชุม"
                         >
                             <LogOut className="w-4 h-4" />
                         </Button>
-                    )}
                 </div>
             </header>
 
             {/* Middle Section: Chat Feed + Sidebar */}
-            <div className="flex-1 flex overflow-hidden relative">
+            <div className="min-h-0 min-w-0 flex-1 flex overflow-hidden relative">
                 {/* Chat Feed (Main Area) */}
-                <div className="flex-1 flex flex-col bg-background/50 overflow-hidden">
+                <div className="min-h-0 min-w-0 flex-1 flex flex-col bg-background/50 overflow-hidden">
                     {/* Messages Scroll Area */}
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+                    <div role="log" aria-label="ข้อความในห้องประชุม" className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3 sm:p-6 space-y-4">
                         {messages.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4 text-muted-foreground">
                                 <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/20 flex items-center justify-center">
@@ -1454,7 +1478,7 @@ export default function MeetingRoomPage({
                     )}
 
                     {/* Chat Input Bar */}
-                    <div className="p-3 sm:p-4 border-t bg-card/50 backdrop-blur-xl shrink-0">
+                    <div className="p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:p-4 border-t bg-card/50 backdrop-blur-xl shrink-0">
                         <form
                             onSubmit={handleSendMessage}
                             className="flex items-end gap-1.5 max-w-5xl mx-auto bg-background/80 border border-border/60 rounded-2xl p-2 shadow-lg focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 transition-all relative"
@@ -1533,7 +1557,7 @@ export default function MeetingRoomPage({
                             </Button>
 
                             {/* Text Input Area */}
-                            <div className="flex-1 relative">
+                            <div className="min-w-0 flex-1 relative">
                                 <Textarea
                                     ref={textareaRef}
                                     value={inputText}
@@ -1545,9 +1569,10 @@ export default function MeetingRoomPage({
                                         }
                                     }}
                                     onPaste={handlePaste}
-                                    placeholder="พิมพ์ข้อความที่นี่... (Enter เพื่อส่ง, Shift+Enter ขึ้นบรรทัดใหม่, วางรูป Ctrl+V ได้)"
+                                    aria-label="พิมพ์ข้อความ"
+                                    placeholder="พิมพ์ข้อความ..."
                                     rows={1}
-                                    className="min-h-[42px] max-h-32 py-2.5 px-2 bg-transparent resize-none text-sm leading-relaxed border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                                    className="min-h-[42px] max-h-32 py-2.5 px-2 bg-transparent resize-none text-base sm:text-sm leading-relaxed border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                                 />
                             </div>
 
@@ -1568,12 +1593,27 @@ export default function MeetingRoomPage({
                 {/* Collapsible Right Sidebar (Participants & Shared Files) */}
                 <AnimatePresence>
                     {activeSidebarTab && (
+                        <motion.button
+                            key="sidebar-backdrop"
+                            type="button"
+                            aria-label="ปิดแผงผู้เข้าร่วมและไฟล์แชร์"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setActiveSidebarTab(null)}
+                            className="absolute inset-0 z-30 bg-black/35 backdrop-blur-sm lg:hidden"
+                        />
+                    )}
+                    {activeSidebarTab && (
                         <motion.aside
+                            key="sidebar"
+                            id="meeting-sidebar"
+                            aria-label="ผู้เข้าร่วมและไฟล์แชร์"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ duration: 0.2 }}
-                            className="absolute inset-y-0 right-0 z-30 w-[85vw] max-w-[320px] md:relative md:w-72 md:max-w-none border-l bg-card/95 backdrop-blur-md flex flex-col shrink-0 overflow-hidden shadow-2xl md:shadow-none"
+                            className="absolute inset-x-2 bottom-2 z-40 max-h-[80%] rounded-2xl border bg-card flex flex-col min-h-0 overflow-hidden shadow-2xl lg:relative lg:inset-auto lg:z-10 lg:h-full lg:max-h-none lg:w-72 lg:shrink-0 lg:rounded-none lg:border-0 lg:border-l lg:shadow-none"
                         >
                             {/* Sidebar Tab Header */}
                             <div className="p-3 border-b flex items-center justify-between bg-gradient-to-r from-muted/50 to-muted/20">
@@ -1603,6 +1643,7 @@ export default function MeetingRoomPage({
                                 </div>
                                 <button
                                     type="button"
+                                    aria-label="ปิดแผงรายชื่อ"
                                     onClick={() => setActiveSidebarTab(null)}
                                     className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-background/80 transition-colors"
                                 >
@@ -1611,7 +1652,7 @@ export default function MeetingRoomPage({
                             </div>
 
                             {/* Sidebar Content */}
-                            <div className="flex-1 overflow-y-auto p-3">
+                            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
                                 {activeSidebarTab === "participants" ? (
                                     <div className="space-y-2">
                                         <div className="text-[11px] font-semibold text-muted-foreground px-1 uppercase tracking-wider flex items-center gap-1.5">
@@ -1722,15 +1763,17 @@ export default function MeetingRoomPage({
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-card/95 backdrop-blur-xl border border-destructive/30 shadow-2xl rounded-2xl p-6 max-w-md w-full space-y-4 overflow-hidden relative"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="meeting-close-title"
+                            className="bg-card/95 backdrop-blur-xl border border-destructive/30 shadow-2xl rounded-2xl p-6 max-w-md w-full max-h-[calc(100dvh-2rem)] space-y-4 overflow-x-hidden overflow-y-auto relative"
                         >
-                            <div className="pointer-events-none absolute -top-16 -right-16 w-40 h-40 rounded-full bg-destructive/10 blur-3xl" />
                             <div className="flex items-center gap-3 text-destructive">
                                 <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20">
                                     <AlertTriangle className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-lg text-foreground">ยืนยันปิดห้องประชุม</h3>
+                                    <h3 id="meeting-close-title" className="font-bold text-lg text-foreground">ยืนยันปิดห้องประชุม</h3>
                                     <p className="text-xs text-muted-foreground">การดำเนินการนี้ไม่สามารถยกเลิกได้</p>
                                 </div>
                             </div>
@@ -1745,13 +1788,13 @@ export default function MeetingRoomPage({
                                 </ul>
                             </div>
 
-                            <div className="flex items-center justify-end gap-2.5 pt-2">
+                            <div className="flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:items-center sm:justify-end">
                                 <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => setShowCloseModal(false)}
                                     disabled={isClosingRoom}
-                                    className="rounded-lg"
+                                    className="w-full rounded-lg sm:w-auto"
                                 >
                                     ยกเลิก
                                 </Button>
@@ -1760,7 +1803,7 @@ export default function MeetingRoomPage({
                                     variant="destructive"
                                     onClick={handleCloseMeetingRoom}
                                     disabled={isClosingRoom}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold rounded-lg shadow-md shadow-destructive/20 border-0"
+                                    className="w-full bg-red-700 text-white hover:bg-red-800 font-semibold rounded-lg shadow-md shadow-destructive/20 border-0 sm:w-auto"
                                 >
                                     {isClosingRoom ? (
                                         <span className="flex items-center gap-2">

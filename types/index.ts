@@ -61,6 +61,7 @@ export interface BlogPost {
 }
 
 export interface SiteSettings {
+  autoSeasonalTheme?: boolean
   id: string
   siteName: string
   siteDescription: string

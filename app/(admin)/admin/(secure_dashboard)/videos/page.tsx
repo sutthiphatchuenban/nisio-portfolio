@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { AdminPageHeader, AdminSearch, AdminFilter, AdminSummary, AdminEmpty } from "@/components/admin/AdminPage"
+import { CircleCheck, FileClock } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -70,6 +72,7 @@ export default function AdminVideosPage() {
     const [isOpen, setIsOpen] = useState(false)
     const [isCategoryOpen, setIsCategoryOpen] = useState(false)
     const [editingVideo, setEditingVideo] = useState<Video | null>(null)
+    const [filter, setFilter] = useState("all")
     const [searchQuery, setSearchQuery] = useState("")
     const [newCategoryName, setNewCategoryName] = useState("")
     const [fetchingMeta, setFetchingMeta] = useState(false)
@@ -228,117 +231,91 @@ export default function AdminVideosPage() {
         setIsOpen(true)
     }
 
-    const filteredVideos = searchQuery
-        ? videos.filter(v => v.title.toLowerCase().includes(searchQuery.toLowerCase()))
-        : videos
+    const filteredVideos = videos.filter(video => [video.title, video.description, ...video.tags].join(" ").toLowerCase().includes(searchQuery.trim().toLowerCase()) && (filter === "all" || (filter === "published" ? video.published : !video.published)))
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Videos</h1>
-                    <p className="text-muted-foreground">Manage your YouTube videos</p>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setIsCategoryOpen(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Category
-                    </Button>
-                    <Button onClick={openCreate}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Video
-                    </Button>
-                </div>
-            </div>
-
-            {/* Search */}
-            <div className="flex items-center gap-2">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search videos..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="max-w-sm"
-                />
-            </div>
-
+            <AdminPageHeader eyebrow="Videos" title="วิดีโอ" description="จัดระเบียบคลังวิดีโอ YouTube หมวดหมู่ และวิดีโอแนะนำของคุณ"><Button variant="outline" onClick={() => setIsCategoryOpen(true)} className="rounded-xl"><Plus className="h-4 w-4" />เพิ่มหมวดหมู่</Button><Button onClick={openCreate} className="rounded-xl"><Plus className="h-4 w-4" />เพิ่มวิดีโอ</Button></AdminPageHeader>
+            <AdminSummary items={[{label:"วิดีโอทั้งหมด",value:videos.length,icon:VideoIcon},{label:"เผยแพร่แล้ว",value:videos.filter(video=>video.published).length,icon:CircleCheck},{label:"ฉบับร่าง",value:videos.filter(video=>!video.published).length,icon:FileClock}]} />
+            <div className="admin-toolbar"><AdminSearch value={searchQuery} onChange={setSearchQuery} placeholder="ค้นหาวิดีโอ…" /><AdminFilter value={filter} onChange={setFilter} options={[{value:"all",label:"ทั้งหมด",count:videos.length},{value:"published",label:"เผยแพร่แล้ว",count:videos.filter(video=>video.published).length},{value:"draft",label:"ฉบับร่าง",count:videos.filter(video=>!video.published).length}]} /></div>
+            <p className="text-xs text-muted-foreground">แสดง {filteredVideos.length} จาก {videos.length} รายการ</p>
             {/* Video Table */}
             {isLoading ? (
                 <div className="flex justify-center py-10">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
             ) : (
-                <div className="rounded-md border">
-                    <Table>
+                <div className="admin-collection">
+                    <Table className="admin-data-table">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Video</TableHead>
-                                <TableHead>Category</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Views</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>วิดีโอ</TableHead>
+                                <TableHead>หมวดหมู่</TableHead>
+                                <TableHead>สถานะ</TableHead>
+                                <TableHead>ยอดเข้าชม</TableHead>
+                                <TableHead className="text-right">จัดการ</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {filteredVideos.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
-                                        No videos found
+                                        <AdminEmpty icon={VideoIcon} title={searchQuery || filter !== "all" ? "ไม่พบวิดีโอที่ตรงกัน" : "ยังไม่มีวิดีโอ"} description="เพิ่มวิดีโอด้วยลิงก์ YouTube หรือเปลี่ยนคำค้นหาและตัวกรอง" />
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 filteredVideos.map((video) => (
                                     <TableRow key={video.id}>
-                                        <TableCell>
+                                        <TableCell data-label="Video">
                                             <div className="flex items-center gap-3">
                                                 {video.thumbnailUrl && (
                                                     <img
                                                         src={video.thumbnailUrl}
                                                         alt=""
-                                                        className="w-20 h-12 object-cover rounded"
+                                                        className="h-12 w-20 shrink-0 rounded-lg border object-cover"
                                                     />
                                                 )}
-                                                <div>
-                                                    <p className="font-medium line-clamp-1">{video.title}</p>
+                                                <div className="min-w-0">
+                                                    <p className="font-medium line-clamp-2">{video.title}</p>
                                                     {video.duration && (
                                                         <p className="text-xs text-muted-foreground">{video.duration}</p>
                                                     )}
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell data-label="Category">
                                             {video.category ? (
                                                 <Badge variant="secondary">{video.category.name}</Badge>
                                             ) : (
                                                 <span className="text-muted-foreground">—</span>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell data-label="Status">
                                             <Badge variant={video.published ? "default" : "outline"}>
-                                                {video.published ? "Published" : "Draft"}
+                                                {video.published ? "เผยแพร่แล้ว" : "ฉบับร่าง"}
                                             </Badge>
                                             {video.featured && (
-                                                <Badge variant="secondary" className="ml-1">Featured</Badge>
+                                                <Badge variant="secondary" className="ml-1">แนะนำ</Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell>{video.viewCount}</TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell data-label="Views">{video.viewCount}</TableCell>
+                                        <TableCell data-label="Actions" className="text-right">
                                             <div className="flex justify-end gap-1">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => window.open(video.youtubeUrl, '_blank')}
+                                                    aria-label={"เปิดวิดีโอ " + video.title} onClick={() => window.open(video.youtubeUrl, "_blank", "noopener,noreferrer")}
                                                 >
                                                     <ExternalLink className="h-4 w-4" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => openEdit(video)}
+                                                    aria-label={"แก้ไข " + video.title} onClick={() => openEdit(video)}
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
-                                                <Button
+                                                <Button aria-label={"ลบ " + video.title}
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => handleDelete(video.id)}
@@ -358,9 +335,9 @@ export default function AdminVideosPage() {
 
             {/* Video Form Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="admin-dialog sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editingVideo ? "Edit Video" : "Add New Video"}</DialogTitle>
+                        <DialogTitle>{editingVideo ? "แก้ไขวิดีโอ" : "เพิ่มวิดีโอใหม่"}</DialogTitle>
                         <DialogDescription>
                             {editingVideo ? "Update video details" : "Add a YouTube video to your portfolio"}
                         </DialogDescription>
@@ -373,7 +350,7 @@ export default function AdminVideosPage() {
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Title</FormLabel>
+                                        <FormLabel>ชื่อ</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Video title" {...field} />
                                         </FormControl>
@@ -421,13 +398,13 @@ export default function AdminVideosPage() {
                                 )}
                             />
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="categoryId"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Category</FormLabel>
+                                            <FormLabel>หมวดหมู่</FormLabel>
                                             <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
@@ -467,7 +444,7 @@ export default function AdminVideosPage() {
                                 name="tags"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Tags (comma separated)</FormLabel>
+                                        <FormLabel>แท็ก (คั่นด้วยเครื่องหมาย ,)</FormLabel>
                                         <FormControl>
                                             <Input placeholder="react, nextjs, tutorial" {...field} />
                                         </FormControl>
@@ -486,14 +463,14 @@ export default function AdminVideosPage() {
                                             <Input placeholder="Auto-generated from YouTube" {...field} readOnly />
                                         </FormControl>
                                         {field.value && (
-                                            <img src={field.value} alt="Thumbnail preview" className="w-48 rounded mt-2" />
+                                            <img src={field.value} alt="Thumbnail preview" className="mt-3 aspect-video w-full max-w-sm rounded-xl border object-contain" />
                                         )}
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            <div className="flex gap-6">
+                            <div className="flex flex-wrap gap-4 rounded-xl border bg-muted/30 p-4">
                                 <FormField
                                     control={form.control}
                                     name="published"
@@ -522,11 +499,11 @@ export default function AdminVideosPage() {
 
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                                    Cancel
+                                    ยกเลิก
                                 </Button>
                                 <Button type="submit" disabled={form.formState.isSubmitting}>
                                     {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    {editingVideo ? "Update" : "Create"}
+                                    {editingVideo ? "บันทึกการเปลี่ยนแปลง" : "เพิ่มวิดีโอ"}
                                 </Button>
                             </DialogFooter>
                         </form>
@@ -536,14 +513,15 @@ export default function AdminVideosPage() {
 
             {/* Category Dialog */}
             <Dialog open={isCategoryOpen} onOpenChange={setIsCategoryOpen}>
-                <DialogContent>
+                <DialogContent className="admin-dialog">
                     <DialogHeader>
-                        <DialogTitle>Add Video Category</DialogTitle>
-                        <DialogDescription>Create a new category for organizing videos</DialogDescription>
+                        <DialogTitle>เพิ่มหมวดหมู่วิดีโอ</DialogTitle>
+                        <DialogDescription>จัดกลุ่มวิดีโอให้ง่ายต่อการค้นหาและจัดการ</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <Input
-                            placeholder="Category name"
+                            aria-label="ชื่อหมวดหมู่"
+                            placeholder="ชื่อหมวดหมู่"
                             value={newCategoryName}
                             onChange={(e) => setNewCategoryName(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleCreateCategory()}
@@ -557,8 +535,8 @@ export default function AdminVideosPage() {
                         )}
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsCategoryOpen(false)}>Cancel</Button>
-                        <Button onClick={handleCreateCategory}>Create</Button>
+                        <Button variant="outline" onClick={() => setIsCategoryOpen(false)}>ยกเลิก</Button>
+                        <Button onClick={handleCreateCategory}>เพิ่มหมวดหมู่</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

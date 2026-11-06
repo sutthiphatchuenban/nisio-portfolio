@@ -2,12 +2,20 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { LogOut, LayoutDashboard, LogIn, Menu } from "lucide-react"
 import { useSiteSettings } from "@/components/providers/site-settings-provider"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
+
+import { ChristmasLights } from "@/components/shared/ChristmasEffects"
+import { SakuraBranches } from "@/components/shared/SakuraEffects"
+
+import { HalloweenDecorations } from "@/components/shared/HalloweenEffects"
+
+import { MonthlyDecorations } from "@/components/shared/MonthlyEffects"
 
 const navLinks = [
     { href: "/projects", label: "Projects" },
@@ -20,12 +28,14 @@ const navLinks = [
 ]
 
 export function Header() {
+    const pathname = usePathname()
+    const isMeetingRoom = pathname?.startsWith("/meeting/") === true
     const [open, setOpen] = useState(false)
     const { data: session, status } = useSession()
     const { settings } = useSiteSettings()
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 w-full shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-14 items-center justify-between">
                 {/* Logo - แสดงทุกขนาดหน้าจอ */}
                 <Link href="/" className="flex items-center space-x-2">
@@ -33,7 +43,7 @@ export function Header() {
                 </Link>
 
                 {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center">
+                <div className="hidden xl:flex items-center">
                     <nav className="flex items-center space-x-6 text-sm font-medium mr-4">
                         {navLinks.map((link) => (
                             <Link
@@ -80,7 +90,7 @@ export function Header() {
                 {/* Mobile Menu */}
                 <Sheet open={open} onOpenChange={setOpen}>
                     <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon" className="md:hidden">
+                        <Button variant="ghost" size="icon" className="xl:hidden">
                             <Menu className="h-5 w-5" />
                             <span className="sr-only">Toggle Menu</span>
                         </Button>
@@ -148,6 +158,12 @@ export function Header() {
                     </SheetContent>
                 </Sheet>
             </div>
+            {!isMeetingRoom && <>
+                <ChristmasLights />
+                <SakuraBranches />
+                <HalloweenDecorations />
+                <MonthlyDecorations />
+            </>}
         </header>
     )
 }

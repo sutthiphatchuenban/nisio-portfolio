@@ -1,8 +1,9 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState } from "react"
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
 
 interface SiteSettings {
+    autoSeasonalTheme: boolean
     siteName: string
     siteDescription: string
     name: string
@@ -25,6 +26,7 @@ interface SiteSettingsContextType {
 }
 
 const defaultSettings: SiteSettings = {
+    autoSeasonalTheme: false,
     siteName: "PORTX",
     siteDescription: "Personal portfolio website",
     name: "",
@@ -50,25 +52,28 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
     const [settings, setSettings] = useState<SiteSettings | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
-    const fetchSettings = async () => {
+    const fetchSettings = useCallback(async () => {
         try {
-            const res = await fetch("/api/settings")
+            const res = await fetch("/api/settings", { cache: "no-store" })
             if (res.ok) {
                 const data = await res.json()
-                setSettings(data)
+                setSettings({ ...data, autoSeasonalTheme: data.autoSeasonalTheme === true })
             } else {
-                setSettings(defaultSettings)
+                setSettings(current => current || defaultSettings)
             }
         } catch {
-            setSettings(defaultSettings)
+            setSettings(current => current || defaultSettings)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [])
 
     useEffect(() => {
-        fetchSettings()
-    }, [])
+        void fetchSettings()
+        const onFocus = () => { void fetchSettings() }
+        window.addEventListener("focus", onFocus)
+        return () => window.removeEventListener("focus", onFocus)
+    }, [fetchSettings])
 
     return (
         <SiteSettingsContext.Provider value={{ settings, isLoading, refetch: fetchSettings }}>

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Separate dev URLs from legacy bundles that browsers cached as immutable.
+  assetPrefix: process.env.NODE_ENV === "development" ? "/_dev-assets" : undefined,
   // Enable React Compiler for production optimization
   reactCompiler: true,
   
@@ -23,20 +25,7 @@ const nextConfig: NextConfig = {
   // Enable gzip compression
   compress: true,
   
-  // Headers for caching static assets
-  async headers() {
-    return [
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-    ];
-  },
+  // Next.js manages static asset caching for development and production.
 };
 
 export default nextConfig;

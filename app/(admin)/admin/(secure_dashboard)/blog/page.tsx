@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { AdminPageHeader, AdminSearch, AdminFilter, AdminSummary, AdminEmpty } from "@/components/admin/AdminPage"
+import { FileText, BookOpen, CircleCheck, FileClock } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -57,6 +59,8 @@ type BlogFormValues = z.infer<typeof blogSchema>
 
 export default function AdminBlogPage() {
     const [posts, setPosts] = useState<BlogPost[]>([])
+    const [query, setQuery] = useState("")
+    const [filter, setFilter] = useState("all")
     const [isLoading, setIsLoading] = useState(true)
     const [isOpen, setIsOpen] = useState(false)
     const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
@@ -155,19 +159,17 @@ export default function AdminBlogPage() {
         }
     }
 
+    const visiblePosts = posts.filter(post => ([post.title, post.excerpt, ...post.tags].join(" ")).toLowerCase().includes(query.trim().toLowerCase()) && (filter === "all" || (filter === "published" ? post.published : !post.published)))
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Blog</h1>
-                <Button onClick={() => setIsOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" /> New Post
-                </Button>
-            </div>
+            <AdminPageHeader eyebrow="blog" title="บทความ" description="เขียนเรื่องราวใหม่ จัดการฉบับร่าง และติดตามบทความที่เผยแพร่"><Button onClick={() => setIsOpen(true)} className="rounded-xl"><Plus className="h-4 w-4" />เขียนบทความ</Button></AdminPageHeader>
+            <AdminSummary items={[{ label: "บทความทั้งหมด", value: posts.length, icon: FileText }, { label: "เผยแพร่แล้ว", value: posts.filter(p => p.published).length, icon: CircleCheck }, { label: "ฉบับร่าง", value: posts.filter(p => !p.published).length, icon: FileClock }]} />
 
             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="admin-dialog sm:max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editingPost ? "Edit Post" : "New Post"}</DialogTitle>
+                        <DialogTitle>{editingPost ? "แก้ไขบทความ" : "เขียนบทความใหม่"}</DialogTitle>
                         <DialogDescription>
                             {editingPost ? "Make changes to your blog post here." : "Create a new blog post."}
                         </DialogDescription>
@@ -179,7 +181,7 @@ export default function AdminBlogPage() {
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Title</FormLabel>
+                                        <FormLabel>ชื่อ</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Post title" {...field} />
                                         </FormControl>
@@ -219,7 +221,7 @@ export default function AdminBlogPage() {
                                 name="content"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Content (Markdown supported)</FormLabel>
+                                        <FormLabel>เนื้อหา (Markdown)</FormLabel>
                                         <FormControl>
                                             <Textarea className="h-64 font-mono text-sm" placeholder="Write your blog post content..." {...field} />
                                         </FormControl>
@@ -234,8 +236,7 @@ export default function AdminBlogPage() {
                                     <FormItem>
                                         <FormLabel>Cover Image (Optional - will use first image from gallery if not set)</FormLabel>
                                         <FormControl>
-                                            <ImageUpload
-                                                value={field.value}
+                                            <ImageUpload preview="original"                                                 value={field.value}
                                                 onChange={field.onChange}
                                             />
                                         </FormControl>
@@ -273,7 +274,7 @@ export default function AdminBlogPage() {
                                     </FormItem>
                                 )}
                             />
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <FormField
                                     control={form.control}
                                     name="published"
@@ -316,22 +317,24 @@ export default function AdminBlogPage() {
                                 />
                             </div>
                             <DialogFooter>
-                                <Button type="submit">Save Post</Button>
+                                <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={form.formState.isSubmitting}>ยกเลิก</Button><Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}บันทึกบทความ</Button>
                             </DialogFooter>
                         </form>
                     </Form>
                 </DialogContent>
             </Dialog>
 
-            <div className="rounded-md border bg-card p-1">
-                <Table>
+            <div className="admin-toolbar"><AdminSearch value={query} onChange={setQuery} placeholder="ค้นหาบทความ…" /><AdminFilter value={filter} onChange={setFilter} options={[{value:"all", label:"ทั้งหมด",count:posts.length},{value:"published",label:"เผยแพร่แล้ว",count:posts.filter(p => p.published).length},{value:"draft",label:"ฉบับร่าง",count:posts.filter(p => !p.published).length}]} /></div>
+            <p className="text-xs text-muted-foreground">แสดง {visiblePosts.length} จาก {posts.length} รายการ</p>
+            <div className="admin-collection">
+                <Table className="admin-data-table">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Title</TableHead>
-                            <TableHead className="hidden md:table-cell">Tags</TableHead>
-                            <TableHead className="hidden sm:table-cell">Status</TableHead>
-                            <TableHead>Views</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>ชื่อ</TableHead>
+                            <TableHead className="hidden md:table-cell">แท็ก</TableHead>
+                            <TableHead className="hidden sm:table-cell">สถานะ</TableHead>
+                            <TableHead>ยอดเข้าชม</TableHead>
+                            <TableHead className="text-right">จัดการ</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -341,27 +344,28 @@ export default function AdminBlogPage() {
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin inline" /> Loading...
                                 </TableCell>
                             </TableRow>
-                        ) : posts.length === 0 ? (
+                        ) : visiblePosts.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">No blog posts found.</TableCell>
+                                <TableCell colSpan={5} className="h-24 text-center"><AdminEmpty icon={FileText} title={query || filter !== "all" ? "ไม่พบรายการที่ตรงกัน" : "ยังไม่มีบทความ"} description={query || filter !== "all" ? "ลองเปลี่ยนคำค้นหาหรือตัวกรอง" : "เริ่มเพิ่มบทความด้วยปุ่มด้านบน"} /></TableCell>
                             </TableRow>
                         ) : (
-                            posts.map((post) => (
+                            visiblePosts.map((post) => (
                                 <TableRow key={post.id}>
-                                    <TableCell className="font-medium">
-                                        <div className="flex items-center gap-2">
+                                    <TableCell data-label="Title" className="font-medium">
+                                        <div className="flex min-w-0 items-center gap-3">
+                                            {post.coverImage && <img src={post.coverImage} alt="" loading="lazy" className="h-12 w-20 shrink-0 rounded-lg border object-cover" />}
                                             {post.featured && <Star className="h-4 w-4 text-yellow-500 fill-current" />}
                                             {post.title}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="hidden md:table-cell">
+                                    <TableCell data-label="Tags" className="hidden md:table-cell">
                                         <div className="flex flex-wrap gap-1">
                                             {post.tags.slice(0, 3).map(t => (
                                                 <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
                                             ))}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="hidden sm:table-cell">
+                                    <TableCell data-label="Status" className="hidden sm:table-cell">
                                         {post.published ? (
                                             <Badge variant="default" className="gap-1">
                                                 <Eye className="h-3 w-3" /> Published
@@ -372,13 +376,13 @@ export default function AdminBlogPage() {
                                             </Badge>
                                         )}
                                     </TableCell>
-                                    <TableCell>{post.viewCount}</TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell data-label="Views">{post.viewCount}</TableCell>
+                                    <TableCell data-label="Actions" className="text-right">
                                         <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(post)}>
+                                            <Button aria-label={"แก้ไข " + post.title} variant="ghost" size="icon" onClick={() => handleEdit(post)}>
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(post)}>
+                                            <Button aria-label={"ลบ " + post.title} variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(post)}>
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>

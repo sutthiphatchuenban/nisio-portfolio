@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { LayoutDashboard, FolderKanban, Wrench, Mail, LogOut, Settings, Menu, FileText, Video } from "lucide-react"
+import { LayoutDashboard, FolderKanban, Wrench, Mail, LogOut, Settings, Menu, FileText, Video, ArrowUpRight, ChevronRight } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useSiteSettings } from "@/components/providers/site-settings-provider"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import { ThemeToggle } from "@/components/shared/ThemeToggle"
+
 
 const sidebarItems = [
     {
@@ -53,21 +53,23 @@ const sidebarItems = [
 // Navigation content ที่ใช้ร่วมกันทั้ง Desktop และ Mobile
 function SidebarContent({ pathname, onLinkClick }: { pathname: string; onLinkClick?: () => void }) {
     return (
-        <nav className="grid items-start px-2 text-sm font-medium lg:px-4 py-4 gap-2">
+        <nav aria-label="เมนูจัดการเว็บไซต์" className="grid items-start gap-1 px-3 py-3 text-sm font-medium">
             {sidebarItems.map((item) => (
                 <Link
                     key={item.href}
                     href={item.href}
                     onClick={onLinkClick}
+                    aria-current={pathname === item.href ? "page" : undefined}
                     className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+                        "group flex min-h-11 items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/70 hover:text-foreground",
                         pathname === item.href
-                            ? "bg-muted text-primary"
+                            ? "bg-primary/10 text-primary"
                             : "text-muted-foreground"
                     )}
                 >
                     <item.icon className="h-4 w-4" />
                     {item.title}
+                    {pathname === item.href && <ChevronRight className="ml-auto h-3.5 w-3.5" />}
                 </Link>
             ))}
         </nav>
@@ -81,14 +83,14 @@ export function MobileSidebar() {
     const { settings } = useSiteSettings()
 
     return (
-        <Sheet open={open} onOpenChange={setOpen}>
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-background px-4 lg:hidden"><Link href="/" className="min-w-0 truncate text-sm font-semibold">{settings?.siteName || "PORTX"} Admin</Link><div className="flex items-center gap-2"><ThemeToggle /><Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden fixed top-4 right-4 z-50">
+                <Button variant="outline" size="icon" className="h-11 w-11">
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">Toggle Menu</span>
                 </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-64 p-0">
+            <SheetContent side="right" className="w-[min(20rem,85vw)] overflow-y-auto p-0">
                 <SheetHeader className="border-b px-4 py-4">
                     <SheetTitle>
                         <Link
@@ -100,14 +102,15 @@ export function MobileSidebar() {
                         </Link>
                     </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col h-[calc(100vh-80px)]">
+                <div className="flex flex-col min-h-[calc(100svh-80px)]">
                     <div className="flex-1">
                         <SidebarContent
                             pathname={pathname ?? ''}
                             onLinkClick={() => setOpen(false)}
                         />
                     </div>
-                    <div className="mt-auto p-4 border-t">
+                    <div className="mx-3 mb-3 mt-auto space-y-2 rounded-xl border bg-muted/25 p-3">
+                    <Link href="/" target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center justify-between gap-2 rounded-lg px-2 text-xs text-muted-foreground hover:text-foreground">ดูเว็บไซต์ของคุณ<ArrowUpRight className="h-3.5 w-3.5" /></Link>
                         <Button
                             variant="outline"
                             className="w-full justify-start gap-2"
@@ -119,7 +122,7 @@ export function MobileSidebar() {
                     </div>
                 </div>
             </SheetContent>
-        </Sheet>
+        </Sheet></div></div>
     )
 }
 
@@ -134,16 +137,17 @@ export function AdminSidebar() {
             <MobileSidebar />
 
             {/* Desktop Sidebar */}
-            <div className="hidden border-r bg-muted/40 md:block w-64 min-h-screen">
-                <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+            <div className="sticky top-0 hidden h-dvh w-[232px] shrink-0 flex-col overflow-y-auto border-r bg-background lg:flex">
+                <div className="flex h-20 shrink-0 items-center gap-3 px-6">
                     <Link href="/" className="flex items-center gap-2 font-semibold">
-                        <span className="">{settings?.siteName || "PORTX"} Admin</span>
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground">{(settings?.siteName || "N").slice(0,1)}</span><span><span className="block text-sm tracking-wide">{settings?.siteName || "PORTX"}</span><span className="mt-0.5 block text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">Admin workspace</span></span>
                     </Link>
                 </div>
                 <div className="flex-1">
                     <SidebarContent pathname={pathname ?? ''} />
                 </div>
-                <div className="mt-auto p-4 border-t">
+                <div className="mx-3 mb-3 mt-auto space-y-2 rounded-xl border bg-muted/25 p-3">
+                    <Link href="/" target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center justify-between gap-2 rounded-lg px-2 text-xs text-muted-foreground hover:text-foreground">ดูเว็บไซต์ของคุณ<ArrowUpRight className="h-3.5 w-3.5" /></Link>
                     <Button
                         variant="outline"
                         className="w-full justify-start gap-2"

@@ -2,6 +2,7 @@ import { AdminSidebar } from "@/components/admin/Sidebar"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
+import { AdminTopbar } from "@/components/admin/AdminTopbar"
 
 export default async function AdminLayout({
     children,
@@ -15,11 +16,12 @@ export default async function AdminLayout({
     }
 
     return (
-        <div className="flex min-h-screen w-full flex-col bg-muted/40 md:flex-row">
+        <div className="admin-workspace flex min-h-screen w-full flex-col bg-muted/20 lg:flex-row">
             <AdminSidebar />
-            <div className="flex flex-col flex-1 sm:gap-4 sm:py-4">
-                <main className="p-4 sm:px-6 sm:py-0 md:gap-8 flex-1">
-                    {children}
+            <div className="flex min-w-0 flex-1 flex-col">
+                <AdminTopbar />
+                <main className="admin-content min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+                    <div className="mx-auto w-full max-w-[1440px]">{children}</div>
                 </main>
             </div>
         </div>
