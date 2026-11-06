@@ -14,6 +14,9 @@ export async function GET(request: Request, props: { params: Promise<{ slug: str
         if (!post) {
             return NextResponse.json({ message: 'Blog post not found' }, { status: 404 })
         }
+        if (!post.published && (await getServerSession(authOptions))?.user?.role !== 'ADMIN') {
+            return NextResponse.json({ message: 'Blog post not found' }, { status: 404 })
+        }
 
         // Only increment view count for published posts
         if (post.published) {

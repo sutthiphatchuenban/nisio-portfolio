@@ -15,6 +15,7 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit
 
     const where: Prisma.ProjectWhereInput = {}
+    if (!(await authorizeAdmin(request)).isAuthorized) where.status = 'published'
 
     if (category) {
         where.category = {

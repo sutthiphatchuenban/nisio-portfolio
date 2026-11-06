@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { LayoutDashboard, FolderKanban, Wrench, Mail, LogOut, Settings, Menu, FileText, Video, ArrowUpRight, ChevronRight } from "lucide-react"
+import { LayoutDashboard, FolderKanban, Wrench, Mail, LogOut, Settings, Menu, FileText, Video, ArrowUpRight, ChevronRight, Bot } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useSiteSettings } from "@/components/providers/site-settings-provider"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 
 
 const sidebarItems = [
+    { title: "AI Agent", href: "/admin/agent", icon: Bot },
     {
         title: "Overview",
         href: "/admin/dashboard",

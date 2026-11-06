@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const where: Prisma.BlogPostWhereInput = {}
 
     // Only show published posts for public access
-    if (!includeUnpublished) {
+    if (!includeUnpublished || !(await authorizeAdmin(request)).isAuthorized) {
         where.published = true
     }
 

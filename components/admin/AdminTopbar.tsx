@@ -6,7 +6,7 @@ import { ArrowUpRight, ChevronRight } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 
-const labels: Record<string, string> = { dashboard: "Overview", projects: "Projects", blog: "Blog", videos: "Videos", skills: "Skills", messages: "Messages", settings: "Settings" }
+const labels: Record<string, string> = { dashboard: "Overview", agent: "AI Agent", projects: "Projects", blog: "Blog", videos: "Videos", skills: "Skills", messages: "Messages", settings: "Settings" }
 
 export function AdminTopbar() {
     const pathname = usePathname()

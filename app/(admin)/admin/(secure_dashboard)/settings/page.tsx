@@ -6,6 +6,7 @@ import axios from "axios"
 import { toast } from "sonner"
 import { ArrowUpRight, Check, Globe2, ImageIcon, Link2, Loader2, Palette, RotateCcw, Save, UserRound } from "lucide-react"
 import Link from "next/link"
+import { AgentSettings } from "@/components/admin/AgentSettings"
 import { HeroPreview } from "@/components/admin/HeroPreview"
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer"
 import { useSiteSettings } from "@/components/providers/site-settings-provider"
@@ -45,6 +46,7 @@ interface SettingsFormValues {
 }
 
 const sections = [
+    { id: "agent", label: "AI Agent", detail: "การเชื่อมต่อ AI", icon: Palette },
     { id: "general", label: "เว็บไซต์", detail: "ชื่อเว็บและการค้นหา", icon: Globe2 },
     { id: "images", label: "ภาพหน้าแรก", detail: "Desktop และ Mobile", icon: ImageIcon },
     { id: "profile", label: "โปรไฟล์", detail: "ข้อมูลและประวัติ", icon: UserRound },
@@ -88,6 +90,8 @@ export default function AdminSettingsPage() {
 
     useEffect(() => {
         fetchSettings()
+        const requested = new URLSearchParams(window.location.search).get("section")
+        if (requested && sections.some(section => section.id === requested)) setActive(requested as typeof sections[number]["id"])
         setCurrentFestival(getFestivalForDate().id)
     }, [])
 
@@ -180,6 +184,7 @@ export default function AdminSettingsPage() {
                             </nav>
                         </aside>
                         <div className="min-w-0 space-y-5" aria-label={sections.find(section => section.id === active)?.label}>
+                            {active === "agent" && <AgentSettings />}
                             {active === "general" && <>
                                 <Panel title="ข้อมูลเว็บไซต์" description="ชื่อและคำอธิบายที่ผู้เข้าชมเห็น รวมถึงข้อมูลที่แสดงบนผลการค้นหา">
                                     {textField("siteName", "ชื่อเว็บไซต์", "ชื่อเว็บไซต์ของคุณ", "ใช้บน Navbar และชื่อแท็บเบราว์เซอร์")}
@@ -229,10 +234,10 @@ export default function AdminSettingsPage() {
                             </>}
                         </div>
                     </div>
-                    <div className="sticky bottom-0 z-40 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 px-4 py-3 shadow-lg backdrop-blur-xl sm:px-5">
+                    {active !== "agent" && <div className="sticky bottom-0 z-40 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background/95 px-4 py-3 shadow-lg backdrop-blur-xl sm:px-5">
                         <p role="status" aria-live="polite" className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">{uploading ? <><Loader2 className="h-4 w-4 animate-spin" />กำลังอัปโหลดรูป…</> : isDirty ? <><span className="h-2 w-2 rounded-full bg-amber-500" />มีการเปลี่ยนแปลงที่ยังไม่บันทึก</> : <><Check className="h-4 w-4 text-emerald-500" />ข้อมูลเป็นปัจจุบัน</>}</p>
                         <div className="flex w-full gap-2 sm:w-auto"><Button type="button" variant="ghost" disabled={!isDirty || busy} onClick={() => form.reset()} className="flex-1 sm:flex-none"><RotateCcw className="h-4 w-4" />คืนค่า</Button><Button type="submit" disabled={!isDirty || busy} className="flex-1 sm:flex-none">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{isSaving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า"}</Button></div>
-                    </div>
+                    </div>}
                 </form>
             </Form>
         </div>

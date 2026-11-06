@@ -14,6 +14,10 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
         if (!project) {
             return NextResponse.json({ message: 'Project not found' }, { status: 404 })
         }
+        const isAdmin = (await getServerSession(authOptions))?.user?.role === 'ADMIN'
+        if (project.status !== 'published' && !isAdmin) {
+            return NextResponse.json({ message: 'Project not found' }, { status: 404 })
+        }
 
         await prisma.project.update({
             where: { id: params.id },
@@ -25,7 +29,8 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
             relatedProjects = await prisma.project.findMany({
                 where: {
                     categoryId: project.categoryId,
-                    id: { not: project.id }
+                    id: { not: project.id },
+                    ...(!isAdmin ? { status: 'published' } : {})
                 },
                 take: 3
             })
