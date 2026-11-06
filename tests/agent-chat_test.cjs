@@ -10,9 +10,10 @@ function load(file, mocks, context = {}) {
 }
 const response={json:(body,options)=>({body,status:options?.status || 200})}
 let session=null, history=[], created=[], calls=0, generatedStatus='draft', apiFormat='chat', lastUrl='', requests=new Map()
+const sid='11111111-1111-4111-8111-111111111111', sid2='22222222-2222-4222-8222-222222222222', sessions=new Map([[sid,[]],[sid2,[]]]), locks=new Set()
 const prisma={
-  $queryRaw:async(strings,...values)=>strings.join('').includes('agent_request') ? (requests.has(values[0]) ? [requests.get(values[0])] : []) : history.length ? [{messages:history}] : [],
-  $executeRaw:async(strings,...values)=>{const sql=strings.join('');if(sql.includes('INSERT INTO agent_request')){if(requests.has(values[0]))return 0;requests.set(values[0],{status:'running'});return 1}if(sql.includes('UPDATE agent_request')){requests.set(values[2],{status:'done',response:JSON.parse(values[0]),response_status:values[1]});return 1}history=JSON.parse(values[1]);return 1},
+  $queryRaw:async(strings,...values)=>{const sql=strings.join('');if(sql.includes('agent_request')){const item=requests.get(values[0]);return item && item.sessionId===values[2] ? [item] : []}return sessions.has(values[0]) ? [{messages:sessions.get(values[0])}] : []},
+  $executeRaw:async(strings,...values)=>{const sql=strings.join('');if(sql.includes('SET active_request=') && !sql.includes('SET active_request=NULL')){if(!sessions.has(values[1])||locks.has(values[1]))return 0;locks.add(values[1]);return 1}if(sql.includes('SET active_request=NULL')){locks.delete(values[0]);return 1}if(sql.includes('INSERT INTO agent_request')){if(requests.has(values[0]))return 0;requests.set(values[0],{status:'running',sessionId:values[2]});return 1}if(sql.includes('UPDATE agent_request')){requests.set(values[2],{...requests.get(values[2]),status:'done',response:JSON.parse(values[0]),response_status:values[1]});return 1}if(sql.includes('SET messages=')){history=JSON.parse(values[0]);sessions.set(values[2],history);return 1}throw Error(sql)},
   project:{findMany:async()=>[],findFirst:async()=>null,create:async({data})=>{created.push(data);return {id:'project-1',...data}}},
   blogPost:{findMany:async()=>[]}
 }
@@ -26,14 +27,15 @@ const agent=load('app/api/admin/agent/chat/route.ts',{
 })
 
 async function run(){
-  let r=await agent.POST({json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',requestId:require('crypto').randomUUID()})});assert.equal(r.status,401)
+  let r=await agent.POST({json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',sessionId:sid,requestId:require('crypto').randomUUID()})});assert.equal(r.status,401)
   session={user:{role:'ADMIN',email:'test@example.invalid'}}
   const replayId=require('crypto').randomUUID()
-  const replayRequest={json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',requestId:replayId})}
+  const replayRequest={json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',sessionId:sid,requestId:replayId})}
   r=await agent.POST(replayRequest);assert.equal(r.status,200);assert.equal(created.length,1);assert.equal(created[0].status,'draft');assert.equal(r.body.actions[0].id,'project-1');assert.equal(history.length,2);const previousCalls=calls;r=await agent.POST(replayRequest);assert.equal(r.status,200);assert.equal(created.length,1);assert.equal(calls,previousCalls)
-  generatedStatus='published';r=await agent.POST({json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',requestId:require('crypto').randomUUID()})});assert.equal(r.status,200);assert.equal(created.length,1);assert.equal(r.body.actions.length,0)
-  apiFormat='responses'; generatedStatus='draft';r=await agent.POST({json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',requestId:require('crypto').randomUUID()})});assert.equal(r.status,200);assert.equal(created.length,2);assert.equal(lastUrl,'https://provider.example/v1/responses');
-  apiFormat='anthropic';r=await agent.POST({json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',requestId:require('crypto').randomUUID()})});assert.equal(r.status,200);assert.equal(created.length,3);assert.equal(lastUrl,'https://provider.example/v1/messages');
+  generatedStatus='published';r=await agent.POST({json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',sessionId:sid,requestId:require('crypto').randomUUID()})});assert.equal(r.status,200);assert.equal(created.length,1);assert.equal(r.body.actions.length,0)
+  apiFormat='responses'; generatedStatus='draft';r=await agent.POST({json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',sessionId:sid,requestId:require('crypto').randomUUID()})});assert.equal(r.status,200);assert.equal(created.length,2);assert.equal(lastUrl,'https://provider.example/v1/responses');
+  apiFormat='anthropic';r=await agent.POST({json:async()=>({message:'สร้างโปรเจกต์เป็นฉบับร่าง',sessionId:sid,requestId:require('crypto').randomUUID()})});assert.equal(r.status,200);assert.equal(created.length,3);assert.equal(lastUrl,'https://provider.example/v1/messages');
+  const priorLength=sessions.get(sid).length; r=await agent.POST({json:async()=>({message:'แชตใหม่',sessionId:sid2,requestId:require('crypto').randomUUID()})});assert.equal(r.status,200);assert.equal(sessions.get(sid).length,priorLength);assert.equal(sessions.get(sid2).length,2);r=await agent.POST({json:async()=>({message:'wrong session',sessionId:sid2,requestId:replayId})});assert.equal(r.status,409)
   console.log('PASS: agent authentication, draft creation, publication guard, idempotency, history and all three provider formats')
 }
 run().catch(error=>{console.error(error);process.exitCode=1})
