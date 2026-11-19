@@ -7,8 +7,8 @@ import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { LogOut, LayoutDashboard, LogIn, Menu } from "lucide-react"
-import { useSiteSettings } from "@/components/providers/site-settings-provider"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
+import { PixelBrand } from "@/components/shared/PixelBrand"
 
 import { ChristmasLights } from "@/components/shared/ChristmasEffects"
 import { SakuraBranches } from "@/components/shared/SakuraEffects"
@@ -32,14 +32,12 @@ export function Header() {
     const isMeetingRoom = pathname?.startsWith("/meeting/") === true
     const [open, setOpen] = useState(false)
     const { data: session, status } = useSession()
-    const { settings } = useSiteSettings()
 
     return (
         <header className="sticky top-0 z-50 w-full shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-14 items-center justify-between">
-                {/* Logo - แสดงทุกขนาดหน้าจอ */}
-                <Link href="/" className="flex items-center space-x-2">
-                    <span className="font-bold">{settings?.siteName || "PORTX"}</span>
+                <Link href="/" className="inline-flex shrink-0 items-center gap-2">
+                    <PixelBrand />
                 </Link>
 
                 {/* Desktop Navigation */}

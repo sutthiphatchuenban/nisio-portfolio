@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { getSiteSettings } from "@/lib/settings";
+import { ThemedFavicon } from "@/components/shared/PixelBrand";
 import { siteConfig, getAbsoluteUrl } from "@/lib/config";
 
 const geistSans = Geist({
@@ -108,11 +109,11 @@ export async function generateMetadata(): Promise<Metadata> {
         },
         icons: {
             icon: [
-                { url: "/favicon.svg", type: "image/svg+xml" },
+                { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
             ],
             shortcut: "/favicon.svg",
             apple: [
-                { url: "/apple-touch-icon.svg", type: "image/svg+xml", sizes: "180x180" },
+                { url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" },
             ],
         },
         manifest: "/site.webmanifest",
@@ -136,6 +137,7 @@ export default function RootLayout({
                 className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
             >
                 <Providers>
+                    <ThemedFavicon />
                     <ThemeEffects />
                     <AnalyticsTracker />
                     {children}
