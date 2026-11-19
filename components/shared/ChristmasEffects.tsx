@@ -1,7 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useState, type CSSProperties } from "react"
-import { Music2, Pause, Play, SlidersHorizontal, Snowflake } from "lucide-react"
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react"
+import { Film, Music2, Pause, Play, SlidersHorizontal, Snowflake } from "lucide-react"
+import { usePathname } from "next/navigation"
+import ChristmasIntro, { shouldAutoPlayChristmasIntro } from "@/components/home/ChristmasIntro"
+import { useSeasonalTheme } from "@/components/providers/seasonal-theme-provider"
+import { Button } from "@/components/ui/button"
 
 const melody: [number, number][] = [
     [329.63,.25],[329.63,.25],[329.63,.5],[329.63,.25],[329.63,.25],[329.63,.5],
@@ -19,6 +23,10 @@ export function ChristmasLights() {
 }
 
 export default function ChristmasEffects() {
+    const pathname = usePathname()
+    const { activeTheme } = useSeasonalTheme()
+    const [introOpen, setIntroOpen] = useState(false)
+    const closeIntro = useCallback(() => setIntroOpen(false), [])
     const [playing, setPlaying] = useState(false)
     const [volume, setVolume] = useState(.2)
     const [options, setOptions] = useState(false)
@@ -27,6 +35,12 @@ export default function ChristmasEffects() {
     const context = useRef<AudioContext | null>(null)
     const master = useRef<GainNode | null>(null)
     const volumeRef = useRef(volume)
+
+    useEffect(() => {
+        if (pathname === "/" && activeTheme === "christmas" && shouldAutoPlayChristmasIntro()) {
+            setIntroOpen(true)
+        }
+    }, [pathname, activeTheme])
 
     useEffect(() => {
         volumeRef.current = volume
@@ -81,12 +95,36 @@ export default function ChristmasEffects() {
     }
 
     return <>
+        {introOpen && <ChristmasIntro onClose={closeIntro} />}
         <div className="winter-atmosphere" aria-hidden="true" />
         <div className="winter-snow" aria-hidden="true" hidden={!snow}>
             {Array.from({length:42}, (_,i) => <span key={i} className={`winter-flake ${i%3===0?'winter-flake-near':''}`} style={{left:`${(i*37.7+3)%100}%`, '--fall-duration':`${14+(i%9)*2}s`, '--fall-delay':`${-((i*5.3)%30)}s`, '--flake-size':`${i%3===0?4:1.5+(i%3)}px`, '--flake-opacity':i%3===0?.4:.25} as CSSProperties} />)}
         </div>
         <div className="winter-player">
-            {options && <div id="winter-options" className="winter-options"><label htmlFor="winter-volume" className="flex items-center justify-between text-xs"><span>ระดับเสียง</span><span>{Math.round(volume*100)}%</span></label><input id="winter-volume" type="range" min="0" max="1" step=".05" value={volume} onChange={e=>setVolume(Number(e.target.value))} className="mt-3 w-full accent-[#e5c78d]" /><label className="mt-4 flex min-h-11 cursor-pointer items-center justify-between gap-6 border-t border-white/10 pt-3 text-xs"><span className="flex items-center gap-2"><Snowflake className="h-3.5 w-3.5" />แสดงหิมะ</span><input type="checkbox" checked={snow} onChange={e=>setSnow(e.target.checked)} className="h-4 w-4 accent-[#e5c78d]" /></label></div>}
+            {options && (
+                <div id="winter-options" className="winter-options">
+                    <label htmlFor="winter-volume" className="flex items-center justify-between text-xs">
+                        <span>ระดับเสียง</span><span>{Math.round(volume * 100)}%</span>
+                    </label>
+                    <input id="winter-volume" type="range" min="0" max="1" step=".05" value={volume}
+                        onChange={event => setVolume(Number(event.target.value))} className="mt-3 w-full accent-[#e5c78d]" />
+                    <label className="mt-4 flex min-h-11 cursor-pointer items-center justify-between gap-6 border-t border-white/10 pt-3 text-xs">
+                        <span className="flex items-center gap-2"><Snowflake className="h-3.5 w-3.5" />แสดงหิมะ</span>
+                        <input type="checkbox" checked={snow} onChange={event => setSnow(event.target.checked)} className="h-4 w-4 accent-[#e5c78d]" />
+                    </label>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        aria-haspopup="dialog"
+                        className="mt-2.5 h-11 w-full cursor-pointer border-primary/30 bg-primary/10 text-xs text-primary hover:border-primary/60 hover:bg-primary/20 hover:text-primary"
+                        onClick={() => setIntroOpen(true)}
+                    >
+                        <Film aria-hidden="true" />
+                        <span className="flex-1 text-left">เล่นอินโทร</span>
+                        <Play className="size-3.5" aria-hidden="true" />
+                    </Button>
+                </div>
+            )}
             {audioError && <p role="alert" className="mb-2 max-w-56 text-xs">ไม่สามารถเปิดเสียงได้ กรุณาลองอีกครั้ง</p>}
             <div className="winter-player-bar"><span className="winter-music-mark" aria-hidden="true"><Music2 className="h-4 w-4" /></span><button type="button" onClick={toggleMusic} aria-label={playing?'หยุดเพลงคริสต์มาส':'เปิดเพลงคริสต์มาส'} aria-pressed={playing} className="winter-play"><span className="flex flex-col items-start"><span className="text-[9px] uppercase tracking-[.15em] opacity-60">Winter radio</span><span className="text-xs font-medium">Jingle Bells</span></span>{playing?<Pause className="h-3.5 w-3.5" />:<Play className="h-3.5 w-3.5" />}</button><button type="button" onClick={()=>setOptions(v=>!v)} aria-label="ตั้งค่าเพลงและหิมะ" aria-expanded={options} aria-controls="winter-options" className="winter-settings"><SlidersHorizontal className="h-4 w-4" /></button></div>
         </div>

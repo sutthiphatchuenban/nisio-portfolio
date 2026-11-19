@@ -8,7 +8,13 @@ import { getFestivalForDate, THEME_IDS } from "@/lib/theme-catalog"
 const MODE_KEY = "portfolio-theme-mode"
 const MANUAL_KEY = "portfolio-manual-theme"
 type Mode = "site" | "auto" | "manual"
-const SeasonalContext = createContext({ automatic: false, enabled: false, chooseTheme: (_id: string) => {}, chooseAutomatic: () => {} })
+const SeasonalContext = createContext({
+    automatic: false,
+    enabled: false,
+    activeTheme: null as string | null,
+    chooseTheme: (_id: string) => {},
+    chooseAutomatic: () => {},
+})
 
 export function SeasonalThemeProvider({ children }: { children: React.ReactNode }) {
     const { theme, setTheme } = useTheme()
@@ -19,6 +25,7 @@ export function SeasonalThemeProvider({ children }: { children: React.ReactNode 
     const [season, setSeason] = useState<string | null>(null)
     const enabled = settings?.autoSeasonalTheme === true
     const automatic = enabled && mode !== "manual"
+    const activeTheme = ready && (settings || mode === "manual") ? (automatic ? season : manual) : null
 
     useEffect(() => {
         const sync = () => {
@@ -41,10 +48,8 @@ export function SeasonalThemeProvider({ children }: { children: React.ReactNode 
     }, [])
 
     useEffect(() => {
-        if (!ready || !settings || !season) return
-        const desired = automatic ? season : manual
-        if (theme !== desired) setTheme(desired)
-    }, [ready, settings, season, automatic, manual, theme, setTheme])
+        if (activeTheme && theme !== activeTheme) setTheme(activeTheme)
+    }, [activeTheme, theme, setTheme])
 
     const chooseTheme = useCallback((id: string) => {
         if (!THEME_IDS.includes(id as typeof THEME_IDS[number])) return
@@ -58,6 +63,6 @@ export function SeasonalThemeProvider({ children }: { children: React.ReactNode 
         setMode("auto"); setTheme(getFestivalForDate().id)
     }, [enabled, setTheme])
 
-    return <SeasonalContext.Provider value={{ enabled, automatic, chooseTheme, chooseAutomatic }}>{children}</SeasonalContext.Provider>
+    return <SeasonalContext.Provider value={{ enabled, automatic, activeTheme, chooseTheme, chooseAutomatic }}>{children}</SeasonalContext.Provider>
 }
 export const useSeasonalTheme = () => useContext(SeasonalContext)
