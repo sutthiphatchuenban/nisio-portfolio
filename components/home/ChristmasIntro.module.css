@@ -14,156 +14,76 @@
     padding: 0;
     border: 0;
     overflow: hidden;
-    background: radial-gradient(ellipse at 50% 45%, #173a4c, #041019 78%);
-    color: #fff4da;
     isolation: isolate;
+    background: #131422;
+    color: #fff4da;
+    animation: reveal-home var(--intro-duration) linear both;
 }
 
 .dialog::backdrop {
     background: transparent;
 }
 
-.dialog[data-playing="true"] {
-    animation: reveal-home var(--intro-duration) linear both;
-}
-
-.scenes,
-.shot,
-.snow {
+.artwork {
     position: absolute;
     inset: 0;
-    overflow: hidden;
+    display: block;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
 }
 
-.scenes::after {
+.dialog::before {
     position: absolute;
+    z-index: 1;
     inset: 0;
-    background:
-        linear-gradient(0deg, #04080eee, #05091058 24%, transparent 49%),
-        radial-gradient(ellipse at center, transparent 48%, #050c1666);
+    background: radial-gradient(ellipse at center, transparent 51%, #15101e5c);
+    pointer-events: none;
     content: "";
-}
-
-.shot {
-    opacity: 0;
-}
-
-.forest {
-    opacity: 1;
-}
-
-.shot img {
-    object-fit: cover;
-    transform-origin: var(--camera-origin);
-    transform: scale(var(--camera-start));
-}
-
-.forest {
-    --camera-origin: 58% 51%;
-    --camera-start: 1.03;
-    --camera-end: 1.25;
-}
-
-.forest img {
-    object-position: 57% center;
-}
-
-.village {
-    --camera-origin: 46% 54%;
-    --camera-start: 1.08;
-    --camera-end: 1.24;
-}
-
-.square {
-    --camera-origin: 50% 17%;
-    --camera-start: 1.14;
-    --camera-end: 1;
-}
-
-.dialog[data-playing="true"] .forest {
-    animation: forest-cut var(--intro-duration) linear both;
-}
-
-.dialog[data-playing="true"] .forest img {
-    animation: camera 2.5s cubic-bezier(.45, .08, .56, .94) both;
-}
-
-.dialog[data-playing="true"] .village {
-    animation: village-cut var(--intro-duration) linear both;
-}
-
-.dialog[data-playing="true"] .village img {
-    animation: camera 2.6s 1.75s ease-in-out both;
-}
-
-.dialog[data-playing="true"] .square {
-    animation: square-cut var(--intro-duration) linear both;
-}
-
-.dialog[data-playing="true"] .square img {
-    animation: camera 3.65s 3.55s cubic-bezier(.2, .75, .25, 1) both;
-}
-
-.bloom {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 50% 29%, #fff1bd, #f7ad5c55 39%, transparent 75%);
-    mix-blend-mode: screen;
-    opacity: 0;
-}
-
-.dialog[data-playing="true"] .bloom {
-    animation: starlight var(--intro-duration) ease-out both;
-}
-
-.snow span {
-    position: absolute;
-    top: 0;
-    width: var(--flake-size);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: #ffeed5;
-    box-shadow: 0 0 .55rem #ffe0a880;
-    filter: blur(var(--flake-blur));
-    opacity: .65;
-    animation: snow-fall var(--fall-time) var(--fall-delay) linear infinite;
 }
 
 .greeting {
     position: absolute;
-    inset-inline: 1rem;
-    bottom: max(5.25rem, 9dvh);
+    z-index: 1;
+    inset-inline: 0;
+    bottom: 0;
+    padding: 3rem 1rem max(4.2rem, 8dvh);
+    background: linear-gradient(transparent, #17121bb0 70%, #17121bd4);
     opacity: 0;
     text-align: center;
     pointer-events: none;
-}
-
-.dialog[data-playing="true"] .greeting {
-    animation: greeting-in 950ms 4.15s cubic-bezier(.22, 1, .36, 1) both;
+    animation: greeting-in 1.2s 25.5s ease-out both;
 }
 
 .greeting h2 {
-    font: normal clamp(2.9rem, 7.3vw, 7.35rem)/.96 Georgia, "Times New Roman", serif;
-    letter-spacing: -.065em;
+    font: italic normal clamp(2.65rem, 7vw, 6.75rem)/.95 Georgia, "Times New Roman", serif;
+    letter-spacing: -.055em;
     text-wrap: balance;
-    color: #fff0c7;
-    text-shadow: 0 3px 14px #130904, 0 0 45px #ffd37d76, 0 7px 50px #130904d9;
+    color: #ffecc1;
+    text-shadow: 0 2px 20px #261932, 0 0 46px #e4a26d70;
 }
 
 .greeting p {
-    margin-top: .9rem;
-    color: #fff5df;
-    font-size: clamp(.875rem, 2.7vw, 1.1rem);
-    line-height: 1.6;
+    margin-top: .8rem;
+    color: #fff0da;
+    font-size: clamp(.875rem, 2.6vw, 1.1rem);
+    line-height: 1.55;
     text-wrap: balance;
-    text-shadow: 0 2px 10px #100500, 0 1px 4px #100500;
 }
 
-.skip {
+.controls {
     position: absolute;
+    z-index: 2;
     right: max(clamp(1rem, 3vw, 2.5rem), env(safe-area-inset-right));
+    left: max(clamp(1rem, 3vw, 2.5rem), env(safe-area-inset-left));
     bottom: max(1rem, env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    pointer-events: none;
+}
+
+.control {
     display: inline-flex;
     align-items: center;
     gap: .6rem;
@@ -171,27 +91,32 @@
     border: 1px solid #fff2d984;
     border-radius: 999px;
     padding-inline: 1rem;
-    background: #0a1520ac;
+    background: #1b1b2dc9;
     color: #fff4da;
-    backdrop-filter: blur(12px);
     cursor: pointer;
     font-size: .875rem;
+    pointer-events: auto;
 }
 
-.skip:hover {
+.control svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.control:hover {
     border-color: #fff2d9;
-    background: #112533;
+    background: #322638;
 }
 
-.skip:focus-visible {
+.control:focus-visible {
     outline: 2px solid #fff2d9;
     outline-offset: 3px;
 }
 
 .progress {
     position: absolute;
-    bottom: 0;
-    width: 100%;
+    z-index: 2;
+    inset: auto 0 0;
     height: 2px;
     background: #fff2d940;
 }
@@ -199,50 +124,16 @@
 .progress::after {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, #e0ac6a, #fff4c7);
+    background: linear-gradient(90deg, #a799c1, #f7d49a);
     transform: scaleX(0);
     transform-origin: left;
+    animation: progress var(--intro-duration) linear both;
     content: "";
 }
 
-.dialog[data-playing="true"] .progress::after {
-    animation: progress var(--intro-duration) linear both;
-}
-
-@keyframes camera {
-    from { transform: scale(var(--camera-start)); }
-    to { transform: scale(var(--camera-end)); }
-}
-
-@keyframes forest-cut {
-    0%, 33% { opacity: 1; }
-    34%, 100% { opacity: 0; }
-}
-
-@keyframes village-cut {
-    0%, 25% { opacity: 0; }
-    33%, 59% { opacity: 1; }
-    60%, 100% { opacity: 0; }
-}
-
-@keyframes square-cut {
-    0%, 49% { opacity: 0; }
-    59%, 100% { opacity: 1; }
-}
-
-@keyframes starlight {
-    0%, 48%, 66%, 100% { opacity: 0; }
-    55% { opacity: .52; }
-}
-
 @keyframes greeting-in {
-    from { opacity: 0; transform: translateY(1.3rem); filter: blur(8px); }
-    to { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
-
-@keyframes snow-fall {
-    from { transform: translate(-6vw, -7vh); }
-    to { transform: translate(14vw, 107dvh); }
+    from { opacity: 0; transform: translateY(.7rem); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes progress {
@@ -250,39 +141,27 @@
 }
 
 @keyframes reveal-home {
-    0%, 89% { opacity: 1; }
+    0%, 96% { opacity: 1; }
     100% { opacity: 0; }
 }
 
-@media (max-width: 600px) {
-    .greeting h2 {
-        font-size: clamp(2.6rem, 11vw, 4rem);
-        letter-spacing: -.055em;
-    }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .dialog[data-playing="true"],
-    .dialog[data-playing="true"] .shot,
-    .dialog[data-playing="true"] .shot img,
-    .dialog[data-playing="true"] .greeting {
+    .dialog[open],
+    .greeting {
         animation: none;
     }
 
-    .dialog[data-playing="true"] .square,
-    .dialog[data-playing="true"] .greeting {
+    .greeting {
         opacity: 1;
     }
 
-    .square img {
-        transform: none;
-    }
-
-    .forest,
-    .village,
-    .bloom,
-    .snow,
     .progress {
         display: none;
+    }
+}
+
+@media (max-height: 480px) {
+    .greeting {
+        padding-bottom: 2rem;
     }
 }

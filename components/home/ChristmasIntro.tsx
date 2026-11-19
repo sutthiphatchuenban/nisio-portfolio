@@ -1,19 +1,14 @@
 "use client"
 
-import { useLayoutEffect, useRef, useState, type CSSProperties } from "react"
-import Image from "next/image"
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react"
+import { Volume2, VolumeX } from "lucide-react"
+import { createChristmasRenderer } from "./christmas-animation"
+import { playChristmasSoundtrack } from "./christmas-soundtrack"
 import styles from "./ChristmasIntro.module.css"
 
-const SEEN_KEY = "portfolio-christmas-intro-seen-v2"
-const INTRO_DURATION = 7200
-const LOAD_TIMEOUT = 2800
+const SEEN_KEY = "portfolio-christmas-intro-seen-v3"
+const INTRO_DURATION = 30_000
 let seenInMemory = false
-
-const scenes = [
-    { image: "snowy-forest.webp", style: styles.forest },
-    { image: "village-street.webp", style: styles.village },
-    { image: "christmas-square.webp", style: styles.square },
-] as const
 
 export function shouldAutoPlayChristmasIntro() {
     if (seenInMemory || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false
@@ -28,45 +23,98 @@ export function shouldAutoPlayChristmasIntro() {
     return true
 }
 
-export default function ChristmasIntro({ onClose }: { onClose: () => void }) {
+type IntroProps = {
+    onClose: () => void
+    initialSound: Promise<AudioContext | null> | null
+    enableAudio: () => Promise<AudioContext | null>
+}
+
+export default function ChristmasIntro({ onClose, initialSound, enableAudio }: IntroProps) {
     const dialogRef = useRef<HTMLDialogElement>(null)
-    const [playing, setPlaying] = useState(false)
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const timeline = useRef({ startedAt: 0, offset: 0 })
+    const [soundRequest, setSoundRequest] = useState(initialSound)
+    const [soundActive, setSoundActive] = useState(false)
 
     useLayoutEffect(() => {
         const dialog = dialogRef.current
-        if (!dialog) return
+        const canvas = canvasRef.current
+        if (!dialog || !canvas) return
+
+        const render = createChristmasRenderer(canvas)
+        if (!render) {
+            onClose()
+            return
+        }
 
         dialog.showModal()
-        let cancelled = false
-        const timeout = window.setTimeout(onClose, LOAD_TIMEOUT)
-        Promise.all(Array.from(dialog.querySelectorAll("img"), image => image.decode()))
-            .then(() => {
-                if (cancelled) return
-                window.clearTimeout(timeout)
-                setPlaying(true)
-            })
-            .catch(() => {
-                if (!cancelled) onClose()
-            })
+        const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)")
+        const still = motionPreference.matches
+        const startedAt = performance.now()
+        // The reduced-motion view displays the final scene for the final seven seconds.
+        timeline.current = { startedAt, offset: still ? 23 : 0 }
+        const timeout = window.setTimeout(onClose, still ? 7000 : INTRO_DURATION)
+        let frame = 0
+        let lastDrawnAt = startedAt
+        let observer: ResizeObserver | undefined
+
+        if (still) {
+            const drawStill = () => render(29, true)
+            drawStill()
+            observer = new ResizeObserver(drawStill)
+            observer.observe(canvas)
+        } else {
+            render(0)
+            const draw = (now: number) => {
+                if (now - lastDrawnAt >= 1000 / 30 - 1) {
+                    render(Math.min(now - startedAt, INTRO_DURATION) / 1000)
+                    lastDrawnAt = now
+                }
+                frame = requestAnimationFrame(draw)
+            }
+            frame = requestAnimationFrame(draw)
+        }
+
+        const handleMotionChange = () => onClose()
+        motionPreference.addEventListener("change", handleMotionChange)
 
         return () => {
-            cancelled = true
             window.clearTimeout(timeout)
+            cancelAnimationFrame(frame)
+            observer?.disconnect()
+            motionPreference.removeEventListener("change", handleMotionChange)
             dialog.close()
         }
     }, [onClose])
 
-    useLayoutEffect(() => {
-        if (!playing) return
-        const timeout = window.setTimeout(onClose, INTRO_DURATION)
-        return () => window.clearTimeout(timeout)
-    }, [onClose, playing])
+    useEffect(() => {
+        if (!soundRequest) {
+            setSoundActive(false)
+            return
+        }
+
+        let cancelled = false
+        let stop: (() => void) | undefined
+        void soundRequest.then(audio => {
+            if (cancelled || !audio) return
+            const { startedAt, offset } = timeline.current
+            const elapsed = offset + (performance.now() - startedAt) / 1000
+            stop = playChristmasSoundtrack(audio, elapsed)
+            setSoundActive(!!stop)
+        }).catch(() => {
+            if (!cancelled) setSoundActive(false)
+        })
+
+        return () => {
+            cancelled = true
+            stop?.()
+        }
+    }, [soundRequest])
 
     return (
         <dialog
             ref={dialogRef}
             className={styles.dialog}
-            data-playing={playing}
             style={{ "--intro-duration": `${INTRO_DURATION}ms` } as CSSProperties}
             aria-labelledby="christmas-intro-title"
             onCancel={event => {
@@ -74,40 +122,25 @@ export default function ChristmasIntro({ onClose }: { onClose: () => void }) {
                 onClose()
             }}
         >
-            <div className={styles.scenes} aria-hidden="true">
-                {scenes.map(({ image, style }, index) => (
-                    <div className={`${styles.shot} ${style}`} key={image}>
-                        <Image
-                            src={`/christmas-intro/${image}`}
-                            alt=""
-                            fill
-                            unoptimized
-                            loading="eager"
-                            fetchPriority={index === 0 ? "high" : "auto"}
-                        />
-                    </div>
-                ))}
-                <div className={styles.bloom} />
-            </div>
-            <div className={styles.snow} aria-hidden="true">
-                {Array.from({ length: 45 }, (_, index) => (
-                    <span key={index} style={{
-                        left: `${(index * 37.9 + 5) % 100}%`,
-                        "--fall-time": `${3 + index % 7}s`,
-                        "--fall-delay": `${-(index * 1.57 % 9)}s`,
-                        "--flake-size": `${2 + index % 5}px`,
-                        "--flake-blur": `${index % 3}px`,
-                    } as CSSProperties} />
-                ))}
-            </div>
+            <canvas ref={canvasRef} className={styles.artwork} aria-hidden="true" />
             <div className={styles.greeting}>
                 <h2 id="christmas-intro-title" lang="en">Merry Christmas</h2>
-                <p>ขอให้คริสต์มาสนี้อบอุ่นและเต็มไปด้วยรอยยิ้ม</p>
+                <p>ขอให้ความอบอุ่นเดินทางไปถึงทุกบ้าน</p>
             </div>
             <div className={styles.progress} aria-hidden="true" />
-            <button type="button" className={styles.skip} onClick={onClose}>
-                ข้ามอินโทร <span aria-hidden="true">→</span>
-            </button>
+            <div className={styles.controls}>
+                <button
+                    type="button"
+                    className={styles.control}
+                    onClick={() => setSoundRequest(soundActive ? null : enableAudio())}
+                >
+                    {soundActive ? <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}
+                    {soundActive ? "ปิดเสียง" : "เปิดเสียง"}
+                </button>
+                <button type="button" className={styles.control} onClick={onClose}>
+                    ข้ามอินโทร <span aria-hidden="true">→</span>
+                </button>
+            </div>
         </dialog>
     )
 }

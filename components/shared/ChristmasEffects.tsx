@@ -26,7 +26,11 @@ export default function ChristmasEffects() {
     const pathname = usePathname()
     const { activeTheme } = useSeasonalTheme()
     const [introOpen, setIntroOpen] = useState(false)
-    const closeIntro = useCallback(() => setIntroOpen(false), [])
+    const [introSoundRequest, setIntroSoundRequest] = useState<Promise<AudioContext | null> | null>(null)
+    const closeIntro = useCallback(() => {
+        setIntroOpen(false)
+        setIntroSoundRequest(null)
+    }, [])
     const [playing, setPlaying] = useState(false)
     const [volume, setVolume] = useState(.2)
     const [options, setOptions] = useState(false)
@@ -34,7 +38,6 @@ export default function ChristmasEffects() {
     const [audioError, setAudioError] = useState(false)
     const context = useRef<AudioContext | null>(null)
     const master = useRef<GainNode | null>(null)
-    const volumeRef = useRef(volume)
 
     useEffect(() => {
         if (pathname === "/" && activeTheme === "christmas" && shouldAutoPlayChristmasIntro()) {
@@ -43,15 +46,15 @@ export default function ChristmasEffects() {
     }, [pathname, activeTheme])
 
     useEffect(() => {
-        volumeRef.current = volume
-        if(context.current && master.current && playing) master.current.gain.setTargetAtTime(volume * .22, context.current.currentTime, .05)
-    }, [volume, playing])
+        if (context.current && master.current) {
+            const level = playing && !introOpen ? volume * .22 : 0
+            master.current.gain.setTargetAtTime(level, context.current.currentTime, .05)
+        }
+    }, [volume, playing, introOpen])
 
     useEffect(() => {
         const ctx = context.current, gain = master.current
-        if (!ctx || !gain) return
-        if (!playing) { gain.gain.setTargetAtTime(0, ctx.currentTime, .03); return }
-        gain.gain.setTargetAtTime(volumeRef.current * .22, ctx.currentTime, .03)
+        if (!ctx || !gain || !playing) return
         let index = 0
         let timer: ReturnType<typeof setTimeout>
         function next() {
@@ -80,22 +83,35 @@ export default function ChristmasEffects() {
         return () => document.removeEventListener("visibilitychange", pause)
     }, [])
 
-    async function toggleMusic() {
-        if(playing) { setPlaying(false); return }
+    const enableAudio = useCallback(async () => {
         try {
-            if(!context.current) {
+            if (!context.current) {
                 context.current = new AudioContext()
                 master.current = context.current.createGain()
                 master.current.gain.value = 0
                 master.current.connect(context.current.destination)
             }
             await context.current.resume()
-            setAudioError(false); setPlaying(true)
-        } catch { setAudioError(true) }
+            return context.current.state === "running" ? context.current : null
+        } catch {
+            return null
+        }
+    }, [])
+
+    async function toggleMusic() {
+        if (playing) { setPlaying(false); return }
+        const audio = await enableAudio()
+        setAudioError(!audio)
+        setPlaying(!!audio)
+    }
+
+    function replayIntro() {
+        setIntroSoundRequest(enableAudio())
+        setIntroOpen(true)
     }
 
     return <>
-        {introOpen && <ChristmasIntro onClose={closeIntro} />}
+        {introOpen && <ChristmasIntro onClose={closeIntro} initialSound={introSoundRequest} enableAudio={enableAudio} />}
         <div className="winter-atmosphere" aria-hidden="true" />
         <div className="winter-snow" aria-hidden="true" hidden={!snow}>
             {Array.from({length:42}, (_,i) => <span key={i} className={`winter-flake ${i%3===0?'winter-flake-near':''}`} style={{left:`${(i*37.7+3)%100}%`, '--fall-duration':`${14+(i%9)*2}s`, '--fall-delay':`${-((i*5.3)%30)}s`, '--flake-size':`${i%3===0?4:1.5+(i%3)}px`, '--flake-opacity':i%3===0?.4:.25} as CSSProperties} />)}
@@ -117,7 +133,7 @@ export default function ChristmasEffects() {
                         variant="outline"
                         aria-haspopup="dialog"
                         className="mt-2.5 h-11 w-full cursor-pointer border-primary/30 bg-primary/10 text-xs text-primary hover:border-primary/60 hover:bg-primary/20 hover:text-primary"
-                        onClick={() => setIntroOpen(true)}
+                        onClick={replayIntro}
                     >
                         <Film aria-hidden="true" />
                         <span className="flex-1 text-left">เล่นอินโทร</span>
